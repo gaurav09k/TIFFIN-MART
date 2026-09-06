@@ -14,7 +14,6 @@ fs.mkdirSync(DATA_DIR, { recursive: true });
 if (!fs.existsSync(ORDERS_FILE)) fs.writeFileSync(ORDERS_FILE, '[]');
 
 const plans = {
-  test: { name: 'TEST PAYMENT (Temporary)', meal: 'Test', single: 1, fifteen: 1, monthly: 1, test: true },
   breakfast: { name: 'Breakfast Only Pass', meal: 'Breakfast', single: 50, fifteen: 700, monthly: 1350 },
   lunch: { name: 'Lunch Only Pass', meal: 'Lunch', single: 80, fifteen: 1150, monthly: 2250 },
   dinner: { name: 'Dinner Only Pass', meal: 'Dinner', single: 80, fifteen: 1150, monthly: 2250 },
@@ -76,7 +75,7 @@ app.post('/api/create-order', async (req,res)=>{
     const name=clean(customer.name,100), phone=clean(customer.phone,20), email=clean(customer.email,150), address=clean(customer.address,600), startDate=clean(customer.startDate,20), note=clean(customer.note,500);
     if(!name || !phone || !address || !startDate) return res.status(400).json({error:'Please fill name, phone, start date and delivery address.'});
     if(!phoneOk(phone)) return res.status(400).json({error:'Please enter a valid mobile number.'});
-    const base=plan[duration], advanceDiscount=(duration==='monthly' && !plan.test)?150:0, delivery=plan.test?0:30, total=Math.max(0,base-advanceDiscount+delivery);
+    const base=plan[duration], advanceDiscount=(duration==='monthly')?150:0, delivery=30, total=Math.max(0,base-advanceDiscount+delivery);
     const receipt=`TM-${Date.now()}`;
     const order=await razorpay.orders.create({amount:total*100,currency:'INR',receipt,notes:{plan:plan.name,duration,customer_name:name,phone}});
     res.json({orderId:order.id,amount:total*100,amountRupees:total,keyId:process.env.RAZORPAY_KEY_ID,planName:plan.name,duration,base,advanceDiscount,delivery,customer:{name,phone,email,address,startDate,note}});

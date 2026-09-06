@@ -1,30 +1,47 @@
-TIFFIN MART — ONLINE PASS + RAZORPAY
+# Tiffin Mart — Online Pass + Razorpay
 
-1) Install Node.js 18+.
-2) Open this folder in terminal.
-3) Run: npm install
-4) Copy .env.example to .env
-5) Put your Razorpay KEY ID and KEY SECRET in .env.
-   NEVER share the Key Secret with anyone.
-6) Test locally: npm start
-7) Open http://localhost:3000
+Production-ready Node/Express website for Tiffin Mart, Giridih.
 
-LIVE:
-- Deploy this Node.js app on a Node-compatible host.
-- Add the same environment variables in the hosting dashboard.
-- Use Razorpay LIVE Key ID/Secret only after your Razorpay account is activated for live payments.
-- Do not put the Key Secret in frontend JavaScript.
+## Included
+- Correct Tiffin Mart pass prices
+- Monthly ₹150 advance discount
+- ₹30 delivery charge
+- Customer + delivery form
+- Razorpay Standard Checkout
+- Server-side Razorpay order creation
+- Server-side payment signature verification
+- Local order backup
+- WhatsApp confirmation link after payment
+- Optional Google Sheets webhook integration
+- Optional email notification via SMTP
+- Terms, Privacy, Refund/Cancellation, Contact pages
 
-BUSINESS DETAILS:
-Tiffin Mart
-Mobile/WhatsApp: 6206652317
-Email: tiffinmartgks@gmail.com
-Area: Giridih, Jharkhand 815316
-Delivery radius: 6 km
-Delivery charge: ₹30
-Breakfast: 8:30 AM
-Lunch: 1:30 PM
-Dinner: 9:00 PM
+## IMPORTANT
+Never put `RAZORPAY_KEY_SECRET` in browser code and never share it in chat. Add it only as a private server environment variable on your hosting provider.
 
-NOTE:
-The website currently logs paid orders on the server console. Google Sheets, email and WhatsApp automation can be connected after the hosting destination and provider credentials are chosen.
+## Local test
+1. Install Node.js 18+.
+2. Run `npm install`.
+3. Copy `.env.example` to `.env`.
+4. Put Razorpay TEST Key ID and TEST Key Secret in `.env`.
+5. Run `npm start`.
+6. Open http://localhost:3000.
+
+## Live deployment
+Recommended: Render / Railway / another Node.js host.
+- Build command: `npm install`
+- Start command: `npm start`
+- Environment variables: see `.env.example`
+- Set `SITE_URL` to your live HTTPS URL.
+- Add your live website URL in Razorpay Dashboard → Account & Settings → Business website detail.
+- Generate Live API Keys only after Razorpay activates the website/payment gateway.
+
+## Optional Google Sheets
+Create a Google Apps Script web app that accepts POST JSON and appends rows to a Google Sheet. Put the deployed Apps Script URL in `GOOGLE_SHEET_WEBHOOK_URL`.
+
+## Optional email
+Set SMTP variables in `.env`. The server sends an order email after successful payment when SMTP is configured.
+
+
+## Temporary ₹1 Live Payment Test
+This build includes a clearly marked `TEST PAYMENT (Temporary)` option priced at ₹1 with ₹0 delivery, intended only to verify the live Razorpay checkout and payment verification flow. After the test succeeds, remove the `test` plan from `server.js` and `public/index.html`, then redeploy.

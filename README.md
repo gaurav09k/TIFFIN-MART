@@ -45,3 +45,11 @@ Set SMTP variables in `.env`. The server sends an order email after successful p
 
 ## Temporary ₹1 Live Payment Test
 This build includes a clearly marked `TEST PAYMENT (Temporary)` option priced at ₹1 with ₹0 delivery, intended only to verify the live Razorpay checkout and payment verification flow. After the test succeeds, remove the `test` plan from `server.js` and `public/index.html`, then redeploy.
+
+
+### Customer My Order
+Customers can now use the **My Order** section with their Order ID and payment mobile number to view paid status, pass, duration, start date, validity/end date, amount paid, remaining days and delivery address.
+
+
+## Customer Invoice
+After successful Razorpay payment, the server creates a PDF invoice. If SMTP is configured, the invoice PDF is emailed to the customer email entered at checkout and the business notification email. The WhatsApp confirmation also includes a secure invoice link. Set `SITE_URL` to the live Railway URL and configure SMTP variables for email delivery.

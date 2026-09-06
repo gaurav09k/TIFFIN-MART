@@ -33,6 +33,7 @@ document.getElementById('orderForm').addEventListener('submit',async e=>{
     const vr=await fetch('/api/verify-payment',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...response,orderDetails:{...customer,planKey:selected.key,planName:out.planName,duration:out.duration,base:out.base,discount:out.advanceDiscount,delivery:out.delivery,total:out.amountRupees}})});
     const vd=await vr.json(); if(!vr.ok) throw new Error(vd.error||'Payment verification failed.');
     setStatus(`Payment successful! Order confirmed: ${vd.confirmationId}`,'status ok');
+    const invoiceBtn=document.createElement('a'); invoiceBtn.href=vd.invoiceUrl; invoiceBtn.target='_blank'; invoiceBtn.rel='noopener'; invoiceBtn.textContent='📄 View / Print Invoice'; invoiceBtn.className='invoice-link'; invoiceBtn.style.display='inline-block'; invoiceBtn.style.marginTop='10px'; invoiceBtn.style.fontWeight='700'; invoiceBtn.style.textDecoration='none'; document.getElementById('status').appendChild(document.createElement('br')); document.getElementById('status').appendChild(invoiceBtn);
     const msg=encodeURIComponent(`Tiffin Mart Order\nOrder: ${vd.confirmationId}\nName: ${customer.name}\nPass: ${out.planName}\nDuration: ${out.duration}\nAmount: ₹${out.amountRupees}\nStart: ${customer.startDate}\nAddress: ${customer.address}`);
     setTimeout(()=>window.open('https://wa.me/916206652317?text='+msg,'_blank'),400);
    }};
@@ -40,3 +41,26 @@ document.getElementById('orderForm').addEventListener('submit',async e=>{
  }catch(err){setStatus(err.message||'Something went wrong.','status error');}
 });
 const nameEl=document.getElementById('name'),phoneEl=document.getElementById('phone'),emailEl=document.getElementById('email'),addressEl=document.getElementById('address');
+
+
+// Customer order lookup
+const lookupForm=document.getElementById('lookupForm');
+if(lookupForm){
+  lookupForm.addEventListener('submit',async e=>{
+    e.preventDefault();
+    const status=document.getElementById('lookupStatus'), result=document.getElementById('orderResult');
+    status.className='status'; status.textContent='Order details loading...'; result.hidden=true; result.innerHTML='';
+    try{
+      const orderId=document.getElementById('lookupOrderId').value.trim();
+      const phone=document.getElementById('lookupPhone').value.trim();
+      const r=await fetch(`/api/order?orderId=${encodeURIComponent(orderId)}&phone=${encodeURIComponent(phone)}`);
+      const d=await r.json(); if(!r.ok) throw new Error(d.error||'Order not found.');
+      const o=d.orderDetails||{};
+      const money=rupees(o.total||0);
+      const durationLabel=d.totalDays===1?'Single':d.totalDays===15?'15 Days':'Monthly';
+      const fmt=x=>x?new Date(x+'T00:00:00').toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}):'-';
+      result.innerHTML=`<div class="result-head"><div><span>Order ID</span><strong>${d.confirmationId}</strong></div><span class="badge-ok">PAID</span></div><div class="result-grid"><div><span>Pass</span><b>${o.planName||'-'}</b></div><div><span>Duration</span><b>${durationLabel}</b></div><div><span>Start Date</span><b>${fmt(d.startDate)}</b></div><div><span>Valid Till</span><b>${fmt(d.endDate)}</b></div><div><span>Amount Paid</span><b>${money}</b></div><div><span>Remaining</span><b>${d.remainingDays} day${d.remainingDays===1?'':'s'}</b></div><div class="full"><span>Delivery Address</span><b>${o.address||'-'}</b></div></div><p class="tiny">For any change, pause request or support, WhatsApp Tiffin Mart on 6206652317.</p>`;
+      result.hidden=false; status.className='status ok'; status.textContent='Order found successfully.';
+    }catch(err){status.className='status error';status.textContent=err.message||'Something went wrong.';}
+  });
+}

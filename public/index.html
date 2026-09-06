@@ -10,7 +10,7 @@
 <body>
 <header class="nav">
   <a class="brand" href="#home"><img src="/logo.png" alt="Tiffin Mart logo"><span>TIFFIN MART</span></a>
-  <nav><a href="#passes">Passes</a><a href="#menu">Menu</a><a href="#benefits">Benefits</a><a href="#order">Order</a></nav>
+  <nav><a href="#passes">Passes</a><a href="#menu">Menu</a><a href="#benefits">Benefits</a><a href="#order">Order</a><a href="#my-order">My Order</a></nav>
   <a class="nav-cta" href="#passes">Buy Pass</a>
 </header>
 <main id="home">
@@ -46,6 +46,8 @@
 <div class="menu-row"><b>Saturday</b><span>Plain Roti, Jeera Aloo, Chutney, Pickle, Sprouts, Salad</span><span>Dal Khichdi, Desi Ghee, Aloo Chokha, Papad, Salad</span><span>Roti, Jeera Rice, Rajma Curry, Mix Veg, Papad, Salad</span></div>
 <div class="menu-row"><b>Sunday</b><span>Aloo Paratha, Curd, Sauce, Pickle, Boiled Egg, Salad</span><span>Roti, Rice, Chicken Curry Non-Veg / Paneer Veg, Mix Veg, Raita, Salad</span><span>Roti, Rice, Egg Bhurji Non-Veg / Paneer Veg, Papad, Salad, Gulab Jamun</span></div>
 </div></section>
+<section id="my-order" class="order-section lookup-section"><div class="section-head"><span class="eyebrow">MY ORDER</span><h2>Apna order kabhi bhi dekhein.</h2><p>Order ID aur wahi mobile number daalein jo payment ke time use kiya tha.</p></div>
+<form id="lookupForm" class="order-card lookup-card"><div class="form-grid"><label>Order ID<input required id="lookupOrderId" placeholder="Example: TM-12345678"></label><label>Mobile Number<input required id="lookupPhone" inputmode="numeric" pattern="[0-9]{10}" placeholder="10-digit mobile"></label></div><button class="btn primary" type="submit">View My Order</button><div id="lookupStatus" class="status"></div><div id="orderResult" class="order-result" hidden></div></form></section>
 <section id="order" class="order-section"><div class="section-head"><span class="eyebrow">ORDER ONLINE</span><h2>Secure your Tiffin Pass.</h2><p>Fill your details. Final total includes delivery. Monthly advance gets ₹150 discount.</p></div>
 <form id="orderForm" class="order-card">
 <div class="selected"><span>Selected Pass</span><strong id="selectedPass">Please choose a pass above</strong><b id="selectedPrice">₹0</b></div>

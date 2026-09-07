@@ -38,6 +38,8 @@ function readCustomers() { return JSON.parse(fs.readFileSync(CUSTOMERS_FILE, 'ut
 function saveCustomers(customers) { fs.writeFileSync(CUSTOMERS_FILE, JSON.stringify(customers, null, 2)); }
 function readSessions() { return JSON.parse(fs.readFileSync(SESSIONS_FILE, 'utf8')); }
 function saveSessions(sessions) { fs.writeFileSync(SESSIONS_FILE, JSON.stringify(sessions, null, 2)); }
+function makeResetToken() { return crypto.randomBytes(32).toString('hex'); }
+function hashResetToken(token) { return crypto.createHash('sha256').update(token).digest('hex'); }
 function normalizePhone(v) { return String(v || '').replace(/[\s-]/g, ''); }
 function passwordOk(v) { return typeof v === 'string' && v.length >= 6 && v.length <= 128; }
 function hashPassword(password, saltHex) {
@@ -178,7 +180,7 @@ app.post('/api/register', (req,res)=>{
     const existing = customers.find(c => c.phone === cleanPhone);
     if (existing) return res.status(409).json({error:'An account already exists for this mobile number. Please login.'});
     const hp = hashPassword(password);
-    customers.push({phone:cleanPhone,name:clean(name,100),email:clean(email,150),passwordHash:hp.hash,passwordSalt:hp.salt,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()});
+    customers.push({phone:cleanPhone,name:clean(name,100),email:clean(email,150),passwordHash:hp.hash,passwordSalt:hp.salt,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),loginCount:0,lastLoginAt:null});
     saveCustomers(customers);
     setSessionCookie(res,newSession(cleanPhone));
     res.json({ok:true,name:clean(name,100)});
@@ -191,9 +193,54 @@ app.post('/api/login', (req,res)=>{
     const password = String(req.body?.password || '');
     const customer = readCustomers().find(c => c.phone === phone);
     if (!customer || !verifyPassword(password,customer.passwordSalt,customer.passwordHash)) return res.status(401).json({error:'Invalid mobile number or password.'});
+    customer.loginCount = Number(customer.loginCount || 0) + 1; customer.lastLoginAt = new Date().toISOString(); saveCustomers(readCustomers().map(c => c.phone === phone ? customer : c));
     setSessionCookie(res,newSession(phone));
     res.json({ok:true,name:customer.name});
   } catch(e){ console.error('Login failed:',e); res.status(500).json({error:'Could not login.'}); }
+});
+
+app.post('/api/forgot-password', async (req,res)=>{
+  try {
+    const phone = normalizePhone(req.body?.phone);
+    const email = clean(req.body?.email,150).toLowerCase();
+    if(!phoneOk(phone) || !email) return res.status(400).json({error:'Please enter your registered mobile number and email.'});
+    const customer = readCustomers().find(c => c.phone === phone && String(c.email||'').toLowerCase() === email);
+    // Do not reveal whether an account exists.
+    if(!customer) return res.json({ok:true,message:'If the mobile and email match an account, a reset link has been sent.'});
+    if(!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) return res.status(503).json({error:'Password reset email is not configured yet. Please complete Gmail SMTP setup in Railway.'});
+    const token = makeResetToken();
+    const tokenHash = hashResetToken(token);
+    const sessions = readSessions().filter(s => !(s.type==='password_reset' && s.phone===phone) && new Date(s.expiresAt)>new Date());
+    sessions.push({type:'password_reset',tokenHash,phone,expiresAt:new Date(Date.now()+30*60*1000).toISOString()});
+    saveSessions(sessions);
+    const base = process.env.SITE_URL || `${req.protocol}://${req.get('host')}`;
+    const resetUrl = `${base}/?reset=${token}`;
+    const nodemailer = require('nodemailer');
+    const transporter = nodemailer.createTransport({host:process.env.SMTP_HOST,port:Number(process.env.SMTP_PORT||587),secure:String(process.env.SMTP_SECURE).toLowerCase()==='true',auth:{user:process.env.SMTP_USER,pass:process.env.SMTP_PASS}});
+    await transporter.sendMail({from:process.env.SMTP_USER,to:customer.email,subject:'Tiffin Mart – Reset Your Password',text:`Hello ${customer.name},\n\nUse this link to reset your Tiffin Mart password (valid for 30 minutes):\n${resetUrl}\n\nIf you did not request this, ignore this email.`,html:`<p>Hello ${clean(customer.name,100)},</p><p>Click below to reset your Tiffin Mart password. This link is valid for 30 minutes.</p><p><a href="${resetUrl}">Reset Password</a></p><p>If you did not request this, ignore this email.</p>`});
+    res.json({ok:true,message:'Password reset link has been sent to your registered email.'});
+  } catch(e){ console.error('Forgot password failed:',e); res.status(500).json({error:'Could not send password reset email.'}); }
+});
+
+app.post('/api/reset-password', (req,res)=>{
+  try {
+    const token = String(req.body?.token||'');
+    const password = String(req.body?.password||'');
+    if(!token || !passwordOk(password)) return res.status(400).json({error:'Please enter a valid new password of at least 6 characters.'});
+    const tokenHash = hashResetToken(token);
+    const sessions = readSessions();
+    const hit = sessions.find(s=>s.type==='password_reset' && s.tokenHash===tokenHash && new Date(s.expiresAt)>new Date());
+    if(!hit) return res.status(400).json({error:'This reset link is invalid or expired. Please request a new one.'});
+    const customers = readCustomers();
+    const customer = customers.find(c=>c.phone===hit.phone);
+    if(!customer) return res.status(400).json({error:'Account not found.'});
+    const hp = hashPassword(password);
+    customer.passwordHash=hp.hash; customer.passwordSalt=hp.salt; customer.updatedAt=new Date().toISOString();
+    saveCustomers(customers);
+    saveSessions(sessions.filter(s=>s!==hit));
+    setSessionCookie(res,newSession(customer.phone));
+    res.json({ok:true,name:customer.name});
+  } catch(e){ console.error('Reset password failed:',e); res.status(500).json({error:'Could not reset password.'}); }
 });
 
 app.post('/api/logout',(req,res)=>{

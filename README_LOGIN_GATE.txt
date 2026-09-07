@@ -1,0 +1,1 @@
+Tiffin Mart Login Gate update: home page is hidden until customer creates an account or logs in. Existing account uses mobile + password. New registration auto-logs in. Login count is tracked per customer in data/customers.json. Paid pass counts can be derived from data/orders.json; an admin dashboard can be added separately with authentication.

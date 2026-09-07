@@ -8,12 +8,68 @@
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </head>
 <body>
+<!-- Mandatory customer authentication gate: the website home is locked until login/create account. -->
+<div id="authGate" class="auth-gate">
+  <div class="auth-gate-card">
+    <img src="/logo.png" class="gate-logo" alt="Tiffin Mart">
+    <span class="eyebrow">WELCOME TO TIFFIN MART</span>
+    <h1>Login to continue</h1>
+    <p class="gate-sub">Pehle account create karein ya existing account se login karein. Login ke baad hi website, menu aur pass prices dikhenge.</p>
+    <div class="gate-tabs">
+      <button type="button" id="showGateRegister" class="gate-tab active">Create Account</button>
+      <button type="button" id="showGateLogin" class="gate-tab">Login</button>
+    </div>
+    <form id="gateRegisterForm" class="gate-form">
+      <label>Full Name<input required id="gateRegisterName" maxlength="100" placeholder="Your name"></label>
+      <label>Mobile Number<input required id="gateRegisterPhone" inputmode="numeric" pattern="[0-9]{10}" maxlength="10" placeholder="10-digit mobile"></label>
+      <label>Email<input required type="email" id="gateRegisterEmail" maxlength="150" placeholder="you@example.com"></label>
+      <label>Password<input required type="password" id="gateRegisterPassword" minlength="6" maxlength="128" placeholder="Create password (6+ characters)"></label>
+      <button class="btn primary" type="submit">Create Account & Continue</button>
+      <div id="gateRegisterStatus" class="status"></div>
+    </form>
+    <form id="gateLoginForm" class="gate-form" hidden>
+      <label>Mobile Number<input required id="gateLoginPhone" inputmode="numeric" pattern="[0-9]{10}" maxlength="10" placeholder="10-digit mobile"></label>
+      <label>Password<input required type="password" id="gateLoginPassword" minlength="6" maxlength="128" placeholder="Your password"></label>
+      <button class="btn primary" type="submit">Login & Continue</button>
+      <button class="forgot-link" type="button" id="openForgotPassword">Forgot Password?</button>
+      <div id="gateLoginStatus" class="status"></div>
+    </form>
+    <div id="forgotPasswordPanel" class="forgot-panel" hidden>
+      <h3>Reset Password</h3>
+      <p class="tiny left">Enter the mobile number and email used when creating your account. We will send a secure reset link.</p>
+      <form id="forgotPasswordForm" class="gate-form">
+        <label>Mobile Number<input required id="forgotPhone" inputmode="numeric" pattern="[0-9]{10}" maxlength="10" placeholder="10-digit mobile"></label>
+        <label>Registered Email<input required type="email" id="forgotEmail" maxlength="150" placeholder="you@example.com"></label>
+        <button class="btn primary" type="submit">Send Reset Link</button>
+        <button class="btn ghost" type="button" id="closeForgotPassword">Back to Login</button>
+        <div id="forgotStatus" class="status"></div>
+      </form>
+    </div>
+    <p class="tiny gate-note">🔒 Your account is required to place and view orders.</p>
+  </div>
+</div>
+
+<div id="resetGate" class="auth-gate" hidden>
+  <div class="auth-gate-card">
+    <img src="/logo.png" class="gate-logo" alt="Tiffin Mart">
+    <span class="eyebrow">TIFFIN MART</span>
+    <h1>Set a new password</h1>
+    <p class="gate-sub">Create a new password for your account.</p>
+    <form id="resetPasswordForm" class="gate-form">
+      <label>New Password<input required type="password" id="resetPassword" minlength="6" maxlength="128" placeholder="New password (6+ characters)"></label>
+      <label>Confirm Password<input required type="password" id="resetPassword2" minlength="6" maxlength="128" placeholder="Confirm password"></label>
+      <button class="btn primary" type="submit">Reset Password & Continue</button>
+      <div id="resetStatus" class="status"></div>
+    </form>
+  </div>
+</div>
+
 <header class="nav">
   <a class="brand" href="#home"><img src="/logo.png" alt="Tiffin Mart logo"><span>TIFFIN MART</span></a>
   <nav><a href="#passes">Passes</a><a href="#menu">Menu</a><a href="#benefits">Benefits</a><a href="#order">Order</a><a href="#account">Login</a><a href="#my-order">My Order</a></nav>
   <a class="nav-cta" href="#passes">Buy Pass</a>
 </header>
-<main id="home">
+<main id="home" class="site-locked">
 <section class="hero">
   <div class="hero-copy">
     <span class="eyebrow">FRESH • PURE • HYGIENIC</span>

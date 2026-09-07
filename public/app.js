@@ -43,6 +43,30 @@ document.getElementById('orderForm').addEventListener('submit',async e=>{
 const nameEl=document.getElementById('name'),phoneEl=document.getElementById('phone'),emailEl=document.getElementById('email'),addressEl=document.getElementById('address');
 
 
+// Mandatory authentication gate: no home/menu/pass content is visible until customer is logged in.
+(function(){
+  const gate=document.getElementById('authGate');
+  const main=document.getElementById('home');
+  const regTab=document.getElementById('showGateRegister');
+  const loginTab=document.getElementById('showGateLogin');
+  const regForm=document.getElementById('gateRegisterForm');
+  const loginForm=document.getElementById('gateLoginForm');
+  function unlock(){ gate.style.display='none'; main.classList.remove('site-locked'); main.style.display='block'; if(typeof loadAccount==='function') loadAccount(); window.scrollTo(0,0); }
+  function tab(which){ const r=which==='register'; regForm.hidden=!r; loginForm.hidden=r; regTab.classList.toggle('active',r); loginTab.classList.toggle('active',!r); }
+  regTab?.addEventListener('click',()=>tab('register')); loginTab?.addEventListener('click',()=>tab('login'));
+  regForm?.addEventListener('submit',async e=>{ e.preventDefault(); const st=document.getElementById('gateRegisterStatus'); st.className='status'; st.textContent='Creating account...'; try{ const r=await fetch('/api/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:gateRegisterName.value.trim(),phone:gateRegisterPhone.value.trim(),email:gateRegisterEmail.value.trim(),password:gateRegisterPassword.value})}); const d=await r.json(); if(!r.ok) throw new Error(d.error||'Could not create account.'); st.className='status ok'; st.textContent='Account created. Opening Tiffin Mart...'; setTimeout(unlock,350); }catch(err){st.className='status error';st.textContent=err.message;} });
+  loginForm?.addEventListener('submit',async e=>{ e.preventDefault(); const st=document.getElementById('gateLoginStatus'); st.className='status'; st.textContent='Logging in...'; try{ const r=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone:gateLoginPhone.value.trim(),password:gateLoginPassword.value})}); const d=await r.json(); if(!r.ok) throw new Error(d.error||'Login failed'); st.className='status ok'; st.textContent='Login successful. Opening Tiffin Mart...'; setTimeout(unlock,350); }catch(err){st.className='status error';st.textContent=err.message;} });
+  const forgotPanel=document.getElementById('forgotPasswordPanel');
+  document.getElementById('openForgotPassword')?.addEventListener('click',()=>{forgotPanel.hidden=false;loginForm.hidden=true;});
+  document.getElementById('closeForgotPassword')?.addEventListener('click',()=>{forgotPanel.hidden=true;loginForm.hidden=false;});
+  document.getElementById('forgotPasswordForm')?.addEventListener('submit',async e=>{e.preventDefault();const st=document.getElementById('forgotStatus');st.className='status';st.textContent='Sending reset link...';try{const r=await fetch('/api/forgot-password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone:document.getElementById('forgotPhone').value.trim(),email:document.getElementById('forgotEmail').value.trim()})});const d=await r.json();if(!r.ok)throw new Error(d.error||'Could not send reset link.');st.className='status ok';st.textContent=d.message||'Reset link sent. Check your email.';}catch(err){st.className='status error';st.textContent=err.message;}});
+  const params=new URLSearchParams(location.search); const resetToken=params.get('reset');
+  if(resetToken){gate.style.display='none';document.getElementById('resetGate').hidden=false;document.getElementById('resetPasswordForm')?.addEventListener('submit',async e=>{e.preventDefault();const st=document.getElementById('resetStatus');const p1=document.getElementById('resetPassword').value;const p2=document.getElementById('resetPassword2').value;if(p1!==p2){st.className='status error';st.textContent='Passwords do not match.';return;}st.className='status';st.textContent='Resetting password...';try{const r=await fetch('/api/reset-password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:resetToken,password:p1})});const d=await r.json();if(!r.ok)throw new Error(d.error||'Could not reset password.');st.className='status ok';st.textContent='Password reset successful. Opening Tiffin Mart...';history.replaceState({},'',location.pathname);setTimeout(()=>{document.getElementById('resetGate').hidden=true;unlock();},500);}catch(err){st.className='status error';st.textContent=err.message;}});}
+
+  async function checkGate(){ try{const r=await fetch('/api/me'); if(r.ok) unlock();}catch(e){} }
+  checkGate();
+})();
+
 // Customer account: create once, then login on future visits
 async function loadAccount(){
   const r=await fetch('/api/me');
@@ -59,7 +83,7 @@ async function loadAccount(){
     return;
   }
   const me=await r.json();
-  document.getElementById('accountGreeting').textContent=`Welcome, ${me.name}. Mobile: ${me.phone}`;
+  document.getElementById('accountGreeting').textContent=`Welcome, ${me.name}. Mobile: ${me.phone}`; if(document.getElementById('name')) document.getElementById('name').value=me.name||''; if(document.getElementById('phone')) document.getElementById('phone').value=me.phone||''; if(document.getElementById('email')) document.getElementById('email').value=me.email||'';
   document.getElementById('logoutBtn').hidden=false;
   if(registerForm) registerForm.hidden=true;
   if(loginForm){

@@ -4,3 +4,23 @@
 .lookup-card{max-width:900px;margin:0 auto}.lookup-card .btn{margin-top:8px}.order-result{margin-top:20px;padding:20px;border:1px solid #d9e4d9;border-radius:18px;background:#fbfefb}.result-head{display:flex;justify-content:space-between;gap:16px;align-items:center;padding-bottom:16px;border-bottom:1px solid #e5ece5}.result-head span:first-child,.result-grid span{display:block;font-size:.78rem;color:#6b756d;text-transform:uppercase;letter-spacing:.06em}.result-head strong{display:block;font-size:1.15rem;margin-top:4px}.badge-ok{display:inline-block;padding:7px 11px;border-radius:999px;background:#e5f7e8;color:#237a35;font-weight:800;font-size:.75rem}.result-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:18px}.result-grid b{display:block;margin-top:5px}.result-grid .full{grid-column:1/-1}@media(max-width:700px){.result-grid{grid-template-columns:1fr}.result-grid .full{grid-column:auto}}
 .account-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;max-width:980px;margin:0 auto}.account-grid h3{margin-top:0}.account-orders{display:grid;gap:12px}.account-order{border:1px solid #e4e9e4;border-radius:14px;padding:14px;background:#fff}.account-order .row{display:flex;justify-content:space-between;gap:10px;margin:5px 0}.account-order .actions{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}.account-order a{color:inherit}.account-section .btn.ghost{margin-left:8px}@media(max-width:760px){.account-grid{grid-template-columns:1fr}.account-section .btn.ghost{margin-left:0;margin-top:8px}}
 .auth-card[hidden], .account-grid form[hidden]{display:none}.account-box-card{max-width:980px;margin:18px auto 0}.tiny.left{text-align:left;margin-top:-8px}.auth-card .btn{margin-top:8px}.hero-actions .btn{white-space:nowrap}
+
+
+/* Mandatory login gate */
+.site-locked{display:none!important}
+.auth-gate{position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(247,244,235,.98);overflow:auto}
+.auth-gate-card{width:min(520px,100%);background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:24px;padding:30px;box-shadow:0 24px 80px rgba(0,0,0,.16);text-align:center}
+.gate-logo{width:78px;height:78px;object-fit:contain;margin:0 auto 10px;display:block}
+.auth-gate-card h1{margin:8px 0 8px;font-size:34px}
+.gate-sub{margin:0 auto 20px;line-height:1.55;color:#666;max-width:430px}
+.gate-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:18px;background:#f2f2ef;padding:5px;border-radius:12px}
+.gate-tab{border:0;border-radius:9px;padding:12px;font-weight:800;cursor:pointer;background:transparent}
+.gate-tab.active{background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.08)}
+.gate-form{text-align:left}
+.gate-form label{display:block;margin:0 0 12px;font-weight:700}
+.gate-form input{display:block;width:100%;box-sizing:border-box;margin-top:6px;padding:12px 13px;border:1px solid #ddd;border-radius:10px;font:inherit}
+.gate-form .btn{width:100%;margin-top:4px}
+.gate-note{margin-top:18px}
+@media(max-width:600px){.auth-gate{padding:14px}.auth-gate-card{padding:22px 18px;border-radius:18px}.auth-gate-card h1{font-size:28px}}
+
+.forgot-link{display:block;width:100%;margin-top:8px;border:0;background:none;text-decoration:underline;cursor:pointer;font-weight:700;padding:8px}.forgot-panel{margin-top:12px}.forgot-panel h3{margin-bottom:6px}.forgot-panel[hidden]{display:none}.auth-gate[hidden]{display:none!important}

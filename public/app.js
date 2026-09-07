@@ -24,7 +24,7 @@ function setStatus(t,cls='status'){const s=document.getElementById('status');s.c
 document.getElementById('orderForm').addEventListener('submit',async e=>{
  e.preventDefault(); if(!selected.price){setStatus('Please select a pass first.','status error');return;}
  setStatus('Creating secure payment...');
- const customer={name:nameEl.value.trim(),phone:phoneEl.value.trim(),email:emailEl.value.trim(),address:addressEl.value.trim(),startDate:start.value,note:''};
+ const customer={name:nameEl.value.trim(),phone:phoneEl.value.trim(),email:emailEl.value.trim(),password:document.getElementById('password').value,address:addressEl.value.trim(),startDate:start.value,note:''};
  try{
   const res=await fetch('/api/create-order',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({planKey:selected.key,duration:selected.duration,customer})});
   const out=await res.json(); if(!res.ok) throw new Error(out.error||'Unable to create payment order.');
@@ -42,6 +42,26 @@ document.getElementById('orderForm').addEventListener('submit',async e=>{
 });
 const nameEl=document.getElementById('name'),phoneEl=document.getElementById('phone'),emailEl=document.getElementById('email'),addressEl=document.getElementById('address');
 
+
+// Customer account login
+async function loadAccount(){
+  const r=await fetch('/api/me');
+  if(!r.ok){ document.getElementById('accountGreeting').textContent='Login to see your account and orders.'; document.getElementById('logoutBtn').hidden=true; return; }
+  const me=await r.json();
+  document.getElementById('accountGreeting').textContent=`Welcome, ${me.name}. Mobile: ${me.phone}`;
+  document.getElementById('logoutBtn').hidden=false;
+  const rr=await fetch('/api/my-orders'); const data=await rr.json();
+  const box=document.getElementById('accountOrders');
+  if(!data.orders?.length){box.innerHTML='<p class="tiny">No paid orders found yet.</p>';return;}
+  const fmt=x=>x?new Date(x+'T00:00:00').toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}):'-';
+  box.innerHTML=data.orders.map(o=>`<div class="account-order"><div class="row"><strong>${o.planName||'-'}</strong><span class="badge-ok">PAID</span></div><div class="row"><span>Order ID</span><b>${o.confirmationId}</b></div><div class="row"><span>Valid Till</span><b>${fmt(o.endDate)}</b></div><div class="row"><span>Remaining</span><b>${o.remainingDays} days</b></div><div class="row"><span>Amount</span><b>₹${Number(o.total||0).toLocaleString('en-IN')}</b></div><div class="actions"><a class="btn ghost" href="${o.invoiceUrl}" target="_blank" rel="noopener">📄 Invoice</a></div></div>`).join('');
+}
+const loginForm=document.getElementById('loginForm');
+if(loginForm){
+ loginForm.addEventListener('submit',async e=>{e.preventDefault();const st=document.getElementById('loginStatus');st.className='status';st.textContent='Logging in...';try{const r=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone:document.getElementById('loginPhone').value.trim(),password:document.getElementById('loginPassword').value})});const d=await r.json();if(!r.ok)throw new Error(d.error||'Login failed');st.className='status ok';st.textContent='Login successful.';document.getElementById('loginPassword').value='';await loadAccount();}catch(err){st.className='status error';st.textContent=err.message;}});
+ document.getElementById('logoutBtn').addEventListener('click',async()=>{await fetch('/api/logout',{method:'POST'});document.getElementById('accountOrders').innerHTML='';document.getElementById('accountGreeting').textContent='Logged out.';document.getElementById('logoutBtn').hidden=true;});
+ loadAccount();
+}
 
 // Customer order lookup
 const lookupForm=document.getElementById('lookupForm');

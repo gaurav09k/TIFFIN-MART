@@ -49,6 +49,41 @@
   </div>
 </div>
 
+<div id="accountModal" class="account-modal" hidden>
+  <div class="account-modal-backdrop" id="accountBackdrop"></div>
+  <aside class="account-panel" role="dialog" aria-modal="true" aria-labelledby="accountTitle">
+    <button class="account-close" id="closeAccount" type="button" aria-label="Close">×</button>
+    <div class="account-panel-head">
+      <img src="/logo.png" alt="Tiffin Mart">
+      <div><span class="eyebrow">CUSTOMER ACCOUNT</span><h2 id="accountTitle">My Account</h2><p id="accountGreeting">Welcome</p></div>
+    </div>
+    <div class="account-profile-card">
+      <div class="account-profile-title"><strong>Your Details</strong><button type="button" class="small-edit" id="editProfileBtn">Edit</button></div>
+      <div class="profile-grid" id="profileView"></div>
+      <form id="profileEditForm" class="profile-edit-form" hidden>
+        <label>Full Name<input required id="editName" maxlength="100"></label>
+        <label>Mobile Number<input id="editPhone" disabled></label>
+        <label>Email<input required type="email" id="editEmail" maxlength="150"></label>
+        <div class="profile-actions"><button class="btn primary" type="submit">Save Changes</button><button class="btn ghost" type="button" id="cancelEditProfile">Cancel</button></div>
+        <div id="profileStatus" class="status"></div>
+      </form>
+    </div>
+    <div class="account-links">
+      <a href="#passes" data-account-link>🍱 Passes</a>
+      <a href="#menu" data-account-link>📋 Menu</a>
+      <a href="#benefits" data-account-link>✨ Benefits</a>
+      <a href="#my-order" id="accountOrdersLink">📦 My Order</a>
+      <a href="/terms.html" target="_blank">📄 Terms & Conditions</a>
+      <a href="/privacy.html" target="_blank">🔒 Privacy Policy</a>
+      <a href="/refund.html" target="_blank">↩️ Refund / Cancellation</a>
+    </div>
+    <div class="account-orders-panel"><div class="account-profile-title"><strong>My Orders</strong></div><div id="accountOrders" class="account-orders"></div></div>
+    <button class="btn logout-account" type="button" id="accountLogout">Logout</button>
+  </aside>
+</div>
+
+<div id="my-order" class="account-anchor" aria-hidden="true"></div>
+
 <div id="resetGate" class="auth-gate" hidden>
   <div class="auth-gate-card">
     <img src="/logo.png" class="gate-logo" alt="Tiffin Mart">
@@ -66,8 +101,7 @@
 
 <header class="nav">
   <a class="brand" href="#home"><img src="/logo.png" alt="Tiffin Mart logo"><span>TIFFIN MART</span></a>
-  <nav><a href="#passes">Passes</a><a href="#menu">Menu</a><a href="#benefits">Benefits</a><a href="#order">Order</a><a href="#account">Login</a><a href="#my-order">My Order</a></nav>
-  <a class="nav-cta" href="#passes">Buy Pass</a>
+  <button class="my-account-btn" id="openAccount" type="button">My Account</button>
 </header>
 <main id="home" class="site-locked">
 <section class="hero">
@@ -75,36 +109,10 @@
     <span class="eyebrow">FRESH • PURE • HYGIENIC</span>
     <h1>Ghar Ka Swad,<br><em>Har Din.</em></h1>
     <p>Homestyle breakfast, lunch & dinner delivered fresh to your doorstep in Giridih.</p>
-    <div class="hero-actions"><a class="btn primary" href="#create-account">Create Account</a><a class="btn ghost" href="#login">Login</a><a class="btn ghost" href="#passes">Choose Your Pass</a></div>
+    <div class="hero-actions"><button class="btn primary" type="button" id="heroMyAccount">My Account</button><a class="btn ghost" href="#passes">Choose Your Pass</a></div>
     <div class="trust"><span>⭐ 5-Star Taste</span><span>🏠 Home-Style</span><span>🚚 Doorstep Delivery</span></div>
   </div>
   <div class="hero-card"><img src="/logo.png" alt="Tiffin Mart"><div class="hero-card-text"><strong>₹5,200</strong><span>All-In-One Monthly Pass</span><small>Breakfast + Lunch + Dinner</small></div></div>
-</section>
-<section id="account" class="order-section account-section">
-  <div class="section-head"><span class="eyebrow">CUSTOMER ACCOUNT</span><h2>Your Tiffin Mart account.</h2><p>Create your account once. After that, simply login with your mobile number and password to order and view your orders.</p></div>
-  <div class="account-grid auth-wrap">
-    <form id="registerForm" class="order-card auth-card">
-      <h3>Create Account</h3><p class="tiny left">New customer? Create your account first.</p>
-      <label>Full Name<input required id="registerName" maxlength="100" placeholder="Your name"></label>
-      <label>Mobile Number<input required id="registerPhone" inputmode="numeric" pattern="[0-9]{10}" maxlength="10" placeholder="10-digit mobile"></label>
-      <label>Email<input required type="email" id="registerEmail" maxlength="150" placeholder="you@example.com"></label>
-      <label>Password<input required type="password" id="registerPassword" minlength="6" maxlength="128" placeholder="Create password (6+ characters)"></label>
-      <button class="btn primary" type="submit">Create Account</button>
-      <div id="registerStatus" class="status"></div>
-    </form>
-    <form id="loginForm" class="order-card auth-card">
-      <h3 id="login">Customer Login</h3><p class="tiny left">Already have an account? Login here.</p>
-      <label>Mobile Number<input required id="loginPhone" inputmode="numeric" pattern="[0-9]{10}" maxlength="10" placeholder="10-digit mobile"></label>
-      <label>Password<input required type="password" id="loginPassword" minlength="6" maxlength="128" placeholder="Your password"></label>
-      <button class="btn primary" type="submit">Login</button>
-      <button class="btn ghost" type="button" id="logoutBtn" hidden>Logout</button>
-      <div id="loginStatus" class="status"></div>
-    </form>
-  </div>
-  <div class="order-card account-box-card" id="accountBox">
-    <h3>My Account</h3><p id="accountGreeting">Create an account or login to continue.</p>
-    <div id="accountOrders" class="account-orders"></div>
-  </div>
 </section>
 <section id="passes" class="section">
   <div class="section-head"><span class="eyebrow">ONLINE PASS</span><h2>Pick the plan that fits your day.</h2><p>Choose Single, 15 Days or Monthly. ₹30 delivery charge is added to every order. Monthly advance gets ₹150 off.</p></div>
@@ -129,8 +137,6 @@
 <div class="menu-row"><b>Sunday</b><span>Aloo Paratha, Curd, Sauce, Pickle, Boiled Egg, Salad</span><span>Roti, Rice, Chicken Curry Non-Veg / Paneer Veg, Mix Veg, Raita, Salad</span><span>Roti, Rice, Egg Bhurji Non-Veg / Paneer Veg, Papad, Salad, Gulab Jamun</span></div>
 </div></section>
 
-<section id="my-order" class="order-section lookup-section"><div class="section-head"><span class="eyebrow">MY ORDER</span><h2>Apna order kabhi bhi dekhein.</h2><p>Order ID aur wahi mobile number daalein jo payment ke time use kiya tha.</p></div>
-<form id="lookupForm" class="order-card lookup-card"><div class="form-grid"><label>Order ID<input required id="lookupOrderId" placeholder="Example: TM-12345678"></label><label>Mobile Number<input required id="lookupPhone" inputmode="numeric" pattern="[0-9]{10}" placeholder="10-digit mobile"></label></div><button class="btn primary" type="submit">View My Order</button><div id="lookupStatus" class="status"></div><div id="orderResult" class="order-result" hidden></div></form></section>
 <section id="order" class="order-section"><div class="section-head"><span class="eyebrow">ORDER ONLINE</span><h2>Secure your Tiffin Pass.</h2><p>Fill your details. Final total includes delivery. Monthly advance gets ₹150 discount.</p></div>
 <form id="orderForm" class="order-card"><div id="orderAuthNotice" class="status error">Please create an account or login before placing an order.</div>
 <div class="selected"><span>Selected Pass</span><strong id="selectedPass">Please choose a pass above</strong><b id="selectedPrice">₹0</b></div>

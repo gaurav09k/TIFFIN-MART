@@ -19,10 +19,36 @@
     <span class="eyebrow">FRESH • PURE • HYGIENIC</span>
     <h1>Ghar Ka Swad,<br><em>Har Din.</em></h1>
     <p>Homestyle breakfast, lunch & dinner delivered fresh to your doorstep in Giridih.</p>
-    <div class="hero-actions"><a class="btn primary" href="#passes">Choose Your Pass</a><a class="btn ghost" href="https://wa.me/916206652317?text=Hello%20Tiffin%20Mart%2C%20I%20want%20to%20know%20about%20tiffin%20passes.">WhatsApp Us</a></div>
+    <div class="hero-actions"><a class="btn primary" href="#create-account">Create Account</a><a class="btn ghost" href="#login">Login</a><a class="btn ghost" href="#passes">Choose Your Pass</a></div>
     <div class="trust"><span>⭐ 5-Star Taste</span><span>🏠 Home-Style</span><span>🚚 Doorstep Delivery</span></div>
   </div>
   <div class="hero-card"><img src="/logo.png" alt="Tiffin Mart"><div class="hero-card-text"><strong>₹5,200</strong><span>All-In-One Monthly Pass</span><small>Breakfast + Lunch + Dinner</small></div></div>
+</section>
+<section id="account" class="order-section account-section">
+  <div class="section-head"><span class="eyebrow">CUSTOMER ACCOUNT</span><h2>Your Tiffin Mart account.</h2><p>Create your account once. After that, simply login with your mobile number and password to order and view your orders.</p></div>
+  <div class="account-grid auth-wrap">
+    <form id="registerForm" class="order-card auth-card">
+      <h3>Create Account</h3><p class="tiny left">New customer? Create your account first.</p>
+      <label>Full Name<input required id="registerName" maxlength="100" placeholder="Your name"></label>
+      <label>Mobile Number<input required id="registerPhone" inputmode="numeric" pattern="[0-9]{10}" maxlength="10" placeholder="10-digit mobile"></label>
+      <label>Email<input required type="email" id="registerEmail" maxlength="150" placeholder="you@example.com"></label>
+      <label>Password<input required type="password" id="registerPassword" minlength="6" maxlength="128" placeholder="Create password (6+ characters)"></label>
+      <button class="btn primary" type="submit">Create Account</button>
+      <div id="registerStatus" class="status"></div>
+    </form>
+    <form id="loginForm" class="order-card auth-card">
+      <h3 id="login">Customer Login</h3><p class="tiny left">Already have an account? Login here.</p>
+      <label>Mobile Number<input required id="loginPhone" inputmode="numeric" pattern="[0-9]{10}" maxlength="10" placeholder="10-digit mobile"></label>
+      <label>Password<input required type="password" id="loginPassword" minlength="6" maxlength="128" placeholder="Your password"></label>
+      <button class="btn primary" type="submit">Login</button>
+      <button class="btn ghost" type="button" id="logoutBtn" hidden>Logout</button>
+      <div id="loginStatus" class="status"></div>
+    </form>
+  </div>
+  <div class="order-card account-box-card" id="accountBox">
+    <h3>My Account</h3><p id="accountGreeting">Create an account or login to continue.</p>
+    <div id="accountOrders" class="account-orders"></div>
+  </div>
 </section>
 <section id="passes" class="section">
   <div class="section-head"><span class="eyebrow">ONLINE PASS</span><h2>Pick the plan that fits your day.</h2><p>Choose Single, 15 Days or Monthly. ₹30 delivery charge is added to every order. Monthly advance gets ₹150 off.</p></div>
@@ -46,14 +72,14 @@
 <div class="menu-row"><b>Saturday</b><span>Plain Roti, Jeera Aloo, Chutney, Pickle, Sprouts, Salad</span><span>Dal Khichdi, Desi Ghee, Aloo Chokha, Papad, Salad</span><span>Roti, Jeera Rice, Rajma Curry, Mix Veg, Papad, Salad</span></div>
 <div class="menu-row"><b>Sunday</b><span>Aloo Paratha, Curd, Sauce, Pickle, Boiled Egg, Salad</span><span>Roti, Rice, Chicken Curry Non-Veg / Paneer Veg, Mix Veg, Raita, Salad</span><span>Roti, Rice, Egg Bhurji Non-Veg / Paneer Veg, Papad, Salad, Gulab Jamun</span></div>
 </div></section>
-<section id="account" class="order-section account-section"><div class="section-head"><span class="eyebrow">CUSTOMER ACCOUNT</span><h2>Login karke apne orders dekhein.</h2><p>Mobile number aur password se secure customer account access karein.</p></div><div class="account-grid"><form id="loginForm" class="order-card"><h3>Customer Login</h3><label>Mobile Number<input required id="loginPhone" inputmode="numeric" pattern="[0-9]{10}" placeholder="10-digit mobile"></label><label>Password<input required type="password" id="loginPassword" minlength="6" placeholder="Your password"></label><button class="btn primary" type="submit">Login</button><button class="btn ghost" type="button" id="logoutBtn" hidden>Logout</button><div id="loginStatus" class="status"></div></form><div class="order-card" id="accountBox"><h3>My Account</h3><p id="accountGreeting">Login to see your account and orders.</p><div id="accountOrders" class="account-orders"></div></div></div></section>
+
 <section id="my-order" class="order-section lookup-section"><div class="section-head"><span class="eyebrow">MY ORDER</span><h2>Apna order kabhi bhi dekhein.</h2><p>Order ID aur wahi mobile number daalein jo payment ke time use kiya tha.</p></div>
 <form id="lookupForm" class="order-card lookup-card"><div class="form-grid"><label>Order ID<input required id="lookupOrderId" placeholder="Example: TM-12345678"></label><label>Mobile Number<input required id="lookupPhone" inputmode="numeric" pattern="[0-9]{10}" placeholder="10-digit mobile"></label></div><button class="btn primary" type="submit">View My Order</button><div id="lookupStatus" class="status"></div><div id="orderResult" class="order-result" hidden></div></form></section>
 <section id="order" class="order-section"><div class="section-head"><span class="eyebrow">ORDER ONLINE</span><h2>Secure your Tiffin Pass.</h2><p>Fill your details. Final total includes delivery. Monthly advance gets ₹150 discount.</p></div>
-<form id="orderForm" class="order-card">
+<form id="orderForm" class="order-card"><div id="orderAuthNotice" class="status error">Please create an account or login before placing an order.</div>
 <div class="selected"><span>Selected Pass</span><strong id="selectedPass">Please choose a pass above</strong><b id="selectedPrice">₹0</b></div>
 <input type="hidden" id="planKey" name="planKey"><input type="hidden" id="duration" name="duration">
-<div class="form-grid"><label>Full Name<input required id="name" name="name" placeholder="Your name"></label><label>Mobile Number<input required id="phone" name="phone" inputmode="numeric" pattern="[0-9]{10}" placeholder="10-digit mobile"></label><label>Email<input required type="email" id="email" name="email" placeholder="you@example.com"></label><label>Password<input required type="password" id="password" name="password" minlength="6" placeholder="Create password (6+ characters)"></label><label>Start Date<input required type="date" id="startDate" name="startDate"></label><label class="full">Delivery Address<textarea required id="address" name="address" rows="3" placeholder="House/Flat, Street, Landmark, Giridih"></textarea></label><label>Food Preference<select id="foodType" name="foodType"><option>Veg</option><option>Non-Veg</option></select></label><label>Payment<select disabled><option>Online Payment · Razorpay</option></select></label></div>
+<div class="form-grid"><label>Full Name<input required id="name" name="name" placeholder="Your name"></label><label>Mobile Number<input required id="phone" name="phone" inputmode="numeric" pattern="[0-9]{10}" placeholder="10-digit mobile"></label><label>Email<input required type="email" id="email" name="email" placeholder="you@example.com"></label><label>Start Date<input required type="date" id="startDate" name="startDate"></label><label class="full">Delivery Address<textarea required id="address" name="address" rows="3" placeholder="House/Flat, Street, Landmark, Giridih"></textarea></label><label>Food Preference<select id="foodType" name="foodType"><option>Veg</option><option>Non-Veg</option></select></label><label>Payment<select disabled><option>Online Payment · Razorpay</option></select></label></div>
 <div class="total"><span>Pass Amount <b id="passAmount">₹0</b></span><span>Discount <b id="discountAmount">₹0</b></span><span>Delivery <b>₹30</b></span><span class="grand">Total <b id="grandTotal">₹30</b></span></div>
 <label class="check"><input type="checkbox" required> I agree to the <a href="/terms.html" target="_blank">Terms</a>, <a href="/privacy.html" target="_blank">Privacy Policy</a> and <a href="/refund.html" target="_blank">Cancellation/Refund Policy</a>.</label>
 <button class="btn primary pay" type="submit">Pay Securely with Razorpay</button><p class="tiny">You will be redirected to Razorpay's secure checkout. Never share your UPI PIN, OTP or card PIN with anyone.</p><div id="status" class="status"></div>

@@ -80,8 +80,9 @@ function adminSessionToken(req) {
   const hit=readSessions().find(s=>s.type==='admin' && s.tokenHash===tokenHash && new Date(s.expiresAt)>new Date());
   return hit ? tokenHash : null;
 }
+const ADMIN_MOBILE = normalizePhone(process.env.ADMIN_MOBILE || '6206652317');
 function requireAdmin(req,res,next) {
-  if(!process.env.ADMIN_PASSWORD) return res.status(503).json({error:'Admin dashboard is not configured. Add ADMIN_PASSWORD in Railway Variables.'});
+  if(!String(process.env.ADMIN_PASSWORD || '')) return res.status(503).json({error:'Admin dashboard is not configured. Add ADMIN_PASSWORD in Railway Variables and redeploy.'});
   if(!adminSessionToken(req)) return res.status(401).json({error:'Admin login required.'});
   next();
 }
@@ -381,9 +382,14 @@ app.post('/api/razorpay-webhook', (req,res)=>{
   console.log('Razorpay webhook:', req.body?.event); res.json({ok:true});
 });
 
+app.get('/api/admin/status',(req,res)=>{
+  res.json({configured:Boolean(String(process.env.ADMIN_PASSWORD || '')),mobileConfigured:Boolean(ADMIN_MOBILE)});
+});
 app.post('/api/admin/login',(req,res)=>{
+  const mobile=normalizePhone(req.body?.mobile||'');
   const password=String(req.body?.password||'');
-  if(!process.env.ADMIN_PASSWORD) return res.status(503).json({error:'Add ADMIN_PASSWORD in Railway Variables first.'});
+  if(!String(process.env.ADMIN_PASSWORD || '')) return res.status(503).json({error:'Admin dashboard is not configured. Add ADMIN_PASSWORD in Railway Variables and redeploy.'});
+  if(mobile !== ADMIN_MOBILE) return res.status(401).json({error:'Invalid admin mobile number.'});
   const a=Buffer.from(password), b=Buffer.from(String(process.env.ADMIN_PASSWORD));
   if(a.length!==b.length || !crypto.timingSafeEqual(a,b)) return res.status(401).json({error:'Invalid admin password.'});
   setAdminCookie(res,newAdminSession());

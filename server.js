@@ -72,6 +72,27 @@ function sessionPhone(req) {
 }
 function requireLogin(req,res,next) { const phone = sessionPhone(req); if (!phone) return res.status(401).json({error:'Please login first.'}); req.customerPhone=phone; next(); }
 function setSessionCookie(res, token) { res.setHeader('Set-Cookie', `tm_session=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${30*24*60*60}${process.env.NODE_ENV==='production' ? '; Secure' : ''}`); }
+function setAdminCookie(res, token) { res.setHeader('Set-Cookie', `tm_admin=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${8*60*60}${process.env.NODE_ENV==='production' ? '; Secure' : ''}`); }
+function adminSessionToken(req) {
+  const raw=req.headers.cookie?.split(';').map(x=>x.trim()).find(x=>x.startsWith('tm_admin='))?.split('=')[1];
+  if(!raw) return null;
+  const tokenHash=crypto.createHash('sha256').update(raw).digest('hex');
+  const hit=readSessions().find(s=>s.type==='admin' && s.tokenHash===tokenHash && new Date(s.expiresAt)>new Date());
+  return hit ? tokenHash : null;
+}
+function requireAdmin(req,res,next) {
+  if(!process.env.ADMIN_PASSWORD) return res.status(503).json({error:'Admin dashboard is not configured. Add ADMIN_PASSWORD in Railway Variables.'});
+  if(!adminSessionToken(req)) return res.status(401).json({error:'Admin login required.'});
+  next();
+}
+function newAdminSession() {
+  const raw=crypto.randomBytes(32).toString('hex');
+  const tokenHash=crypto.createHash('sha256').update(raw).digest('hex');
+  const sessions=readSessions().filter(s=>new Date(s.expiresAt)>new Date());
+  sessions.push({type:'admin',tokenHash,expiresAt:new Date(Date.now()+8*60*60*1000).toISOString()});
+  saveSessions(sessions);
+  return raw;
+}
 function saveOrder(order) {
   const all = readOrders(); all.push(order);
   fs.writeFileSync(ORDERS_FILE, JSON.stringify(all, null, 2));
@@ -255,6 +276,19 @@ app.get('/api/me',requireLogin,(req,res)=>{
   if(!c) return res.status(401).json({error:'Account not found.'});
   res.json({name:c.name,phone:c.phone,email:c.email});
 });
+app.put('/api/me',requireLogin,(req,res)=>{
+  try {
+    const name=clean(req.body?.name,100);
+    const email=clean(req.body?.email,150).toLowerCase();
+    if(!name || !email || !/^\S+@\S+\.\S+$/.test(email)) return res.status(400).json({error:'Please enter a valid name and email.'});
+    const customers=readCustomers();
+    const c=customers.find(x=>x.phone===req.customerPhone);
+    if(!c) return res.status(404).json({error:'Account not found.'});
+    c.name=name; c.email=email; c.updatedAt=new Date().toISOString();
+    saveCustomers(customers);
+    res.json({ok:true,name:c.name,phone:c.phone,email:c.email});
+  } catch(e){ console.error('Profile update failed:',e); res.status(500).json({error:'Could not update your details.'}); }
+});
 
 app.get('/api/my-orders',requireLogin,(req,res)=>{
   const orders=readOrders().filter(o=>normalizePhone(o.orderDetails?.phone)===req.customerPhone).sort((a,b)=>new Date(b.paidAt)-new Date(a.paidAt));
@@ -345,6 +379,33 @@ app.post('/api/razorpay-webhook', (req,res)=>{
   const expected=crypto.createHmac('sha256',process.env.RAZORPAY_WEBHOOK_SECRET).update(raw).digest('hex');
   const a=Buffer.from(expected), b=Buffer.from(signature); if(a.length!==b.length||!crypto.timingSafeEqual(a,b)) return res.status(400).send('Invalid signature');
   console.log('Razorpay webhook:', req.body?.event); res.json({ok:true});
+});
+
+app.post('/api/admin/login',(req,res)=>{
+  const password=String(req.body?.password||'');
+  if(!process.env.ADMIN_PASSWORD) return res.status(503).json({error:'Add ADMIN_PASSWORD in Railway Variables first.'});
+  const a=Buffer.from(password), b=Buffer.from(String(process.env.ADMIN_PASSWORD));
+  if(a.length!==b.length || !crypto.timingSafeEqual(a,b)) return res.status(401).json({error:'Invalid admin password.'});
+  setAdminCookie(res,newAdminSession());
+  res.json({ok:true});
+});
+app.post('/api/admin/logout',requireAdmin,(req,res)=>{
+  const raw=req.headers.cookie?.split(';').map(x=>x.trim()).find(x=>x.startsWith('tm_admin='))?.split('=')[1];
+  if(raw){ const h=crypto.createHash('sha256').update(raw).digest('hex'); saveSessions(readSessions().filter(s=>s.tokenHash!==h)); }
+  res.setHeader('Set-Cookie','tm_admin=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0');
+  res.json({ok:true});
+});
+app.get('/api/admin/summary',requireAdmin,(req,res)=>{
+  const customers=readCustomers();
+  const orders=readOrders().filter(o=>o.status==='paid' || o.paymentStatus==='captured' || o.paymentStatus==='paid');
+  const revenue=orders.reduce((sum,o)=>sum+Number(o.orderDetails?.total||0),0);
+  const buyers=new Set(orders.map(o=>normalizePhone(o.orderDetails?.phone)).filter(Boolean));
+  const customerRows=customers.map(c=>{
+    const cos=orders.filter(o=>normalizePhone(o.orderDetails?.phone)===c.phone).sort((a,b)=>new Date(b.paidAt)-new Date(a.paidAt));
+    const last=cos[0]; const d=last?.orderDetails||{};
+    return {name:c.name,phone:c.phone,email:c.email,createdAt:c.createdAt,loginCount:Number(c.loginCount||0),lastLoginAt:c.lastLoginAt,orders:cos.length,lastOrderId:last?.confirmationId||null,lastPass:d.planName||null,lastAmount:d.total||null};
+  }).sort((a,b)=>new Date(b.lastLoginAt||b.createdAt)-new Date(a.lastLoginAt||a.createdAt));
+  res.json({ok:true,stats:{customers:customers.length,totalLogins:customers.reduce((n,c)=>n+Number(c.loginCount||0),0),paidOrders:orders.length,passBuyers:buyers.size,revenue},customers:customerRows});
 });
 
 app.get('*',(req,res)=>res.sendFile(path.join(__dirname,'public','index.html')));

@@ -106,8 +106,13 @@ function adminPasswordSource() {
   return null;
 }
 
+function adminOtpEmail() { return String(process.env.ADMIN_EMAIL || process.env.SMTP_USER || '').trim(); }
+function adminOtpConfigured() { return Boolean(adminOtpEmail() && process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS); }
+function adminOtpHash(code) {
+  return crypto.createHash('sha256').update(String(code)).digest('hex');
+}
 function requireAdmin(req,res,next) {
-  if(!getAdminPassword()) return res.status(503).json({error:'Admin password is not available to the running server. Check the production service variable ADMIN_PASSWORD and redeploy.'});
+  if(!adminOtpConfigured()) return res.status(503).json({error:'Admin email OTP is not configured. Check SMTP settings in Railway Variables.'});
   if(!adminSessionToken(req)) return res.status(401).json({error:'Admin login required.'});
   next();
 }
@@ -119,6 +124,23 @@ function newAdminSession() {
   saveSessions(sessions);
   return raw;
 }
+async function sendAdminOtp(email, code) {
+  const nodemailer = require('nodemailer');
+  const transporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST,
+    port: Number(process.env.SMTP_PORT||587),
+    secure: String(process.env.SMTP_SECURE).toLowerCase()==='true',
+    auth:{user:process.env.SMTP_USER,pass:process.env.SMTP_PASS}
+  });
+  await transporter.sendMail({
+    from: process.env.SMTP_USER,
+    to: email,
+    subject: 'Tiffin Mart Admin Login OTP',
+    text: `Your Tiffin Mart admin login OTP is ${code}. It expires in 10 minutes. If you did not request this code, ignore this email.`,
+    html: `<div style="font-family:Arial,sans-serif;max-width:520px"><h2>TIFFIN MART · Admin Login</h2><p>Your one-time login code is:</p><div style="font-size:32px;font-weight:800;letter-spacing:8px;margin:20px 0">${code}</div><p>This OTP expires in <b>10 minutes</b>.</p><p>If you did not request this code, you can ignore this email.</p></div>`
+  });
+}
+
 function saveOrder(order) {
   const all = readOrders(); all.push(order);
   fs.writeFileSync(ORDERS_FILE, JSON.stringify(all, null, 2));
@@ -408,16 +430,34 @@ app.post('/api/razorpay-webhook', (req,res)=>{
 });
 
 app.get('/api/admin/status',(req,res)=>{
-  res.json({configured:Boolean(getAdminPassword()),passwordSource:adminPasswordSource(),mobileConfigured:Boolean(ADMIN_MOBILE)});
+  res.json({configured:adminOtpConfigured(),authMethod:'email_otp',emailConfigured:Boolean(adminOtpEmail()),smtpConfigured:Boolean(process.env.SMTP_HOST&&process.env.SMTP_USER&&process.env.SMTP_PASS),mobileConfigured:Boolean(ADMIN_MOBILE)});
 });
-app.post('/api/admin/login',(req,res)=>{
-  const mobile=normalizePhone(req.body?.mobile||'');
-  const password=String(req.body?.password||'');
-  const adminPassword=getAdminPassword();
-  if(!adminPassword) return res.status(503).json({error:'Admin password is not available to the running server. Check the production service variable ADMIN_PASSWORD and redeploy.'});
+const adminOtpRate = new Map();
+app.post('/api/admin/request-otp',async (req,res)=>{
+  try {
+    const mobile=normalizePhone(req.body?.mobile||'');
+    if(mobile !== ADMIN_MOBILE) return res.status(401).json({error:'Invalid admin mobile number.'});
+    if(!adminOtpConfigured()) return res.status(503).json({error:'Admin email OTP is not configured. Add SMTP settings in Railway Variables.'});
+    const now=Date.now(); const prev=adminOtpRate.get(mobile)||0;
+    if(now-prev<60*1000) return res.status(429).json({error:'Please wait 60 seconds before requesting another OTP.'});
+    const code=String(crypto.randomInt(100000,1000000));
+    const sessions=readSessions().filter(s=>!(s.type==='admin_otp' && (s.mobile===mobile || new Date(s.expiresAt)<=new Date())));
+    sessions.push({type:'admin_otp',mobile,codeHash:adminOtpHash(code),expiresAt:new Date(now+10*60*1000).toISOString(),attempts:0});
+    saveSessions(sessions); adminOtpRate.set(mobile,now);
+    await sendAdminOtp(adminOtpEmail(),code);
+    res.json({ok:true,message:'OTP sent to the registered admin email.'});
+  } catch(e) { console.error('Admin OTP send failed:',e.message); res.status(500).json({error:'Could not send OTP. Check SMTP configuration.'}); }
+});
+app.post('/api/admin/verify-otp',(req,res)=>{
+  const mobile=normalizePhone(req.body?.mobile||''); const code=String(req.body?.otp||'').trim();
   if(mobile !== ADMIN_MOBILE) return res.status(401).json({error:'Invalid admin mobile number.'});
-  const a=Buffer.from(password), b=Buffer.from(adminPassword);
-  if(a.length!==b.length || !crypto.timingSafeEqual(a,b)) return res.status(401).json({error:'Invalid admin password.'});
+  if(!/^\d{6}$/.test(code)) return res.status(400).json({error:'Enter the 6-digit OTP.'});
+  const sessions=readSessions(); const hit=sessions.find(s=>s.type==='admin_otp'&&s.mobile===mobile);
+  if(!hit || new Date(hit.expiresAt)<=new Date()) return res.status(401).json({error:'OTP expired. Request a new OTP.'});
+  if(Number(hit.attempts||0)>=5) return res.status(429).json({error:'Too many incorrect attempts. Request a new OTP.'});
+  const ok=crypto.timingSafeEqual(Buffer.from(hit.codeHash),Buffer.from(adminOtpHash(code)));
+  if(!ok){ hit.attempts=Number(hit.attempts||0)+1; saveSessions(sessions); return res.status(401).json({error:'Invalid OTP.'}); }
+  saveSessions(sessions.filter(s=>s!==hit));
   setAdminCookie(res,newAdminSession());
   res.json({ok:true});
 });

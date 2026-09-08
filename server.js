@@ -81,8 +81,33 @@ function adminSessionToken(req) {
   return hit ? tokenHash : null;
 }
 const ADMIN_MOBILE = normalizePhone(process.env.ADMIN_MOBILE || '6206652317');
+
+function getAdminPassword() {
+  const envPassword = String(process.env.ADMIN_PASSWORD || '').trim();
+  if (envPassword) return envPassword;
+  const filePath = String(process.env.ADMIN_PASSWORD_FILE || '').trim();
+  if (filePath) {
+    try {
+      const filePassword = fs.readFileSync(filePath, 'utf8').trim();
+      if (filePassword) return filePassword;
+    } catch (_) {}
+  }
+  return '';
+}
+
+function adminPasswordSource() {
+  if (String(process.env.ADMIN_PASSWORD || '').trim()) return 'ADMIN_PASSWORD';
+  const filePath = String(process.env.ADMIN_PASSWORD_FILE || '').trim();
+  if (filePath) {
+    try {
+      if (fs.readFileSync(filePath, 'utf8').trim()) return 'ADMIN_PASSWORD_FILE';
+    } catch (_) {}
+  }
+  return null;
+}
+
 function requireAdmin(req,res,next) {
-  if(!String(process.env.ADMIN_PASSWORD || '')) return res.status(503).json({error:'Admin dashboard is not configured. Add ADMIN_PASSWORD in Railway Variables and redeploy.'});
+  if(!getAdminPassword()) return res.status(503).json({error:'Admin password is not available to the running server. Check the production service variable ADMIN_PASSWORD and redeploy.'});
   if(!adminSessionToken(req)) return res.status(401).json({error:'Admin login required.'});
   next();
 }
@@ -383,14 +408,15 @@ app.post('/api/razorpay-webhook', (req,res)=>{
 });
 
 app.get('/api/admin/status',(req,res)=>{
-  res.json({configured:Boolean(String(process.env.ADMIN_PASSWORD || '')),mobileConfigured:Boolean(ADMIN_MOBILE)});
+  res.json({configured:Boolean(getAdminPassword()),passwordSource:adminPasswordSource(),mobileConfigured:Boolean(ADMIN_MOBILE)});
 });
 app.post('/api/admin/login',(req,res)=>{
   const mobile=normalizePhone(req.body?.mobile||'');
   const password=String(req.body?.password||'');
-  if(!String(process.env.ADMIN_PASSWORD || '')) return res.status(503).json({error:'Admin dashboard is not configured. Add ADMIN_PASSWORD in Railway Variables and redeploy.'});
+  const adminPassword=getAdminPassword();
+  if(!adminPassword) return res.status(503).json({error:'Admin password is not available to the running server. Check the production service variable ADMIN_PASSWORD and redeploy.'});
   if(mobile !== ADMIN_MOBILE) return res.status(401).json({error:'Invalid admin mobile number.'});
-  const a=Buffer.from(password), b=Buffer.from(String(process.env.ADMIN_PASSWORD));
+  const a=Buffer.from(password), b=Buffer.from(adminPassword);
   if(a.length!==b.length || !crypto.timingSafeEqual(a,b)) return res.status(401).json({error:'Invalid admin password.'});
   setAdminCookie(res,newAdminSession());
   res.json({ok:true});

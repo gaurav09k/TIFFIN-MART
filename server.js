@@ -32,6 +32,8 @@ const razorpay = (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET
 
 app.use(express.json({ limit: '100kb' }));
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/admin.html', (req,res,next)=>{res.set('Cache-Control','no-store, no-cache, must-revalidate, proxy-revalidate'); res.set('Pragma','no-cache'); res.set('Expires','0'); next();});
+app.use('/owner.html', (req,res,next)=>{res.set('Cache-Control','no-store, no-cache, must-revalidate, proxy-revalidate'); res.set('Pragma','no-cache'); res.set('Expires','0'); next();});
 
 function readOrders() { return JSON.parse(fs.readFileSync(ORDERS_FILE, 'utf8')); }
 function readCustomers() { return JSON.parse(fs.readFileSync(CUSTOMERS_FILE, 'utf8')); }

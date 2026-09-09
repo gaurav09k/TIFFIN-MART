@@ -5,11 +5,12 @@
   "description": "Tiffin Mart online pass ordering with Razorpay",
   "main": "server.js",
   "scripts": {
-    "start": "node start-owner.js",
-    "dev": "node start-owner.js"
+    "start": "node server.js",
+    "dev": "node server.js"
   },
   "dependencies": {
     "dotenv": "^16.4.7",
+    "express": "^4.21.2",
     "razorpay": "^2.9.6",
     "nodemailer": "^6.10.1",
     "pdfkit": "^0.17.2"

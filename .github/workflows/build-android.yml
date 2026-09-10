@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 env:
   GRADLE_VERSION: '8.7'
@@ -35,6 +35,7 @@ jobs:
         run: gradle -p android-app :customer:assembleDebug :owner:assembleDebug --stacktrace
 
       - name: Upload Customer APK
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: Tiffin-Mart-Customer-APK
@@ -42,8 +43,20 @@ jobs:
           if-no-files-found: error
 
       - name: Upload Owner APK
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: Tiffin-Mart-Owner-APK
           path: android-app/owner/build/outputs/apk/debug/owner-debug.apk
           if-no-files-found: error
+
+      - name: Publish build status
+        if: always()
+        shell: bash
+        run: |
+          printf 'status=%s\nrun_id=%s\nrun_url=https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\ncommit=%s\n' "${{ job.status }}" "${{ github.run_id }}" "${{ github.sha }}" > android-build-status.txt
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add android-build-status.txt
+          git diff --cached --quiet || git commit -m "Report Android build status"
+          git push

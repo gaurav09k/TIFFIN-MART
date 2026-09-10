@@ -1,0 +1,17 @@
+plugins { id 'com.android.application' }
+
+android {
+    namespace 'com.tiffinmart.customer'
+    compileSdk 35
+    defaultConfig {
+        applicationId 'com.tiffinmart.customer'
+        minSdk 23
+        targetSdk 35
+        versionCode 3
+        versionName '1.2.0'
+    }
+}
+
+dependencies {
+    implementation 'com.razorpay:checkout:1.6.40'
+}

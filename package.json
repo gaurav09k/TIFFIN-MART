@@ -5,7 +5,7 @@
   "description": "Tiffin Mart online pass ordering with Razorpay",
   "main": "server.js",
   "scripts": {
-    "start": "node -e \"const fs=require('fs');const p='server.js';let s=fs.readFileSync(p,'utf8');s=s.replace(\\\"app.get('/api/admin/summary',requireAdmin,(req,res)=>\\\",\\\"app.get('/api/admin/summary',(req,res)=>\\\");fs.writeFileSync(p,s);require('./server.js')\"",
+    "start": "node -e \"const fs=require('fs');const p='server.js';let s=fs.readFileSync(p,'utf8');s=s.replace(\\\"app.get('/api/admin/summary',requireAdmin,(req,res)=>\\\",\\\"app.get('/api/admin/summary',(req,res)=>\\\");const old=\\\"notes:{plan:plan.name,duration,customer_name:name,phone}\\\";const neu=\\\"notes:{plan:plan.name,duration,customer_name:name,phone,email:email,address:address,start_date:startDate,note:note}\\\";if(s.includes(old))s=s.replace(old,neu);fs.writeFileSync(p,s);require('./server.js')\"",
     "dev": "node server.js"
   },
   "dependencies": {

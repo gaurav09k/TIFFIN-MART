@@ -19,7 +19,7 @@ if (!fs.existsSync(CUSTOMERS_FILE)) fs.writeFileSync(CUSTOMERS_FILE, '[]');
 if (!fs.existsSync(SESSIONS_FILE)) fs.writeFileSync(SESSIONS_FILE, '[]');
 
 const plans = {
-  breakfast: { name: 'Breakfast Only Pass', meal: 'Breakfast', single: 50, fifteen: 700, monthly: 1350 },
+  breakfast: { name: 'Breakfast Only Pass', meal: 'Breakfast', single: 50, fifteen: 700, monthly: 1700 },
   lunch: { name: 'Lunch Only Pass', meal: 'Lunch', single: 80, fifteen: 1150, monthly: 2250 },
   dinner: { name: 'Dinner Only Pass', meal: 'Dinner', single: 80, fifteen: 1150, monthly: 2250 },
   breakfastLunch: { name: 'Breakfast + Lunch Pass', meal: 'Breakfast + Lunch', single: 120, fifteen: 1750, monthly: 3350 },
@@ -155,50 +155,54 @@ function buildInvoicePdf(order) {
   return new Promise((resolve, reject) => {
     try {
       const d = order.orderDetails || {};
-      const doc = new PDFDocument({ size: 'A4', margin: 48 });
+      const doc = new PDFDocument({ size: 'A4', margin: 42 });
       const chunks = [];
       doc.on('data', c => chunks.push(c));
       doc.on('end', () => resolve(Buffer.concat(chunks)));
       doc.on('error', reject);
-
       const money = n => `Rs. ${Number(n || 0).toLocaleString('en-IN')}`;
       const duration = d.duration === 'single' ? 'Single' : d.duration === 'fifteen' ? '15 Days' : 'Monthly';
-      doc.fontSize(24).font('Helvetica-Bold').text('TIFFIN MART');
-      doc.fontSize(11).font('Helvetica').text('Ghar Ka Swad, Har Din.');
-      doc.moveDown(1);
-      doc.fontSize(18).font('Helvetica-Bold').text('PAYMENT INVOICE');
-      doc.moveDown(0.7);
-      doc.fontSize(10).font('Helvetica')
-        .text(`Invoice / Order ID: ${order.confirmationId}`)
-        .text(`Payment ID: ${order.razorpay_payment_id || '-'}`)
-        .text(`Payment Date: ${new Date(order.paidAt).toLocaleString('en-IN')}`);
-      doc.moveDown(1);
-      doc.font('Helvetica-Bold').text('Customer Details');
-      doc.font('Helvetica')
-        .text(`Name: ${d.name || '-'}`)
-        .text(`Mobile: ${d.phone || '-'}`)
-        .text(`Email: ${d.email || '-'}`)
-        .text(`Delivery Address: ${d.address || '-'}`);
-      doc.moveDown(1);
-      doc.font('Helvetica-Bold').text('Order Details');
-      doc.font('Helvetica')
-        .text(`Pass: ${d.planName || '-'}`)
-        .text(`Duration: ${duration}`)
-        .text(`Start Date: ${d.startDate || '-'}`);
-      doc.moveDown(0.8);
-      doc.font('Helvetica-Bold').text(`Pass Price: ${money(d.base)}`);
-      if (Number(d.discount || 0) > 0) doc.font('Helvetica').text(`Advance Discount: -${money(d.discount)}`);
-      doc.font('Helvetica').text(`Delivery Charge: ${money(d.delivery)}`);
-      doc.fontSize(14).font('Helvetica-Bold').text(`TOTAL PAID: ${money(d.total)}`);
-      doc.moveDown(1.5);
-      doc.fontSize(10).font('Helvetica').text('Payment Status: PAID');
-      doc.text('Thank you for choosing Tiffin Mart.');
-      doc.text('Fresh, Pure & Hygienic Home-Style Food Delivery Service');
+      const green = '#2e7d32', navy = '#142746', orange = '#f79300', light = '#f4f8f2', grey = '#667085';
+      doc.roundedRect(42,38,511,82,14).fill(green);
+      doc.fillColor('#fff').fontSize(23).font('Helvetica-Bold').text('TIFFIN MART',62,55);
+      doc.fontSize(10).font('Helvetica').text('Ghar Ka Swad, Har Din.',63,86);
+      doc.fillColor('#fff').fontSize(17).font('Helvetica-Bold').text('PAYMENT INVOICE',380,58,{width:150,align:'right'});
+      doc.fontSize(9).font('Helvetica').text('Fresh • Pure • Hygienic',380,84,{width:150,align:'right'});
+      let y=142;
+      doc.fillColor(navy).fontSize(10).font('Helvetica-Bold').text('INVOICE DETAILS',42,y); y+=18;
+      doc.fillColor(grey).font('Helvetica').text(`Invoice / Order ID: ${order.confirmationId}`,42,y);
+      doc.text(`Payment ID: ${order.razorpay_payment_id || '-'}`,300,y); y+=16;
+      doc.text(`Payment Date: ${new Date(order.paidAt).toLocaleString('en-IN')}`,42,y);
+      doc.fillColor(green).font('Helvetica-Bold').text('PAID',480,y,{width:73,align:'right'});
+      y+=30; doc.roundedRect(42,y,511,112,10).fill(light);
+      doc.fillColor(navy).fontSize(11).font('Helvetica-Bold').text('CUSTOMER DETAILS',58,y+15);
+      doc.fillColor('#182230').fontSize(10).font('Helvetica');
+      doc.text(`Name: ${d.name || '-'}`,58,y+38); doc.text(`Mobile: ${d.phone || '-'}`,300,y+38);
+      doc.text(`Email: ${d.email || '-'}`,58,y+58); doc.text(`Start Date: ${d.startDate || '-'}`,300,y+58);
+      doc.text(`Address: ${d.address || '-'}`,58,y+78,{width:450});
+      y+=138; doc.fillColor(navy).fontSize(11).font('Helvetica-Bold').text('ORDER SUMMARY',42,y); y+=18;
+      doc.roundedRect(42,y,511,30,7).fill(navy); doc.fillColor('#fff').fontSize(9).font('Helvetica-Bold');
+      doc.text('PASS',55,y+10); doc.text('DURATION',280,y+10); doc.text('AMOUNT',465,y+10,{width:75,align:'right'});
+      y+=30; doc.fillColor('#182230').roundedRect(42,y,511,45,7).fill('#fff'); doc.fillColor('#182230').fontSize(9).font('Helvetica');
+      doc.text(d.planName || '-',55,y+15,{width:205}); doc.text(duration,280,y+15);
+      doc.font('Helvetica-Bold').text(money(d.base),465,y+15,{width:75,align:'right'});
+      doc.moveTo(42,y+45).lineTo(553,y+45).strokeColor('#e8e6df').stroke(); y+=58;
+      doc.fillColor(grey).fontSize(10).font('Helvetica').text('Pass Amount',340,y);
+      doc.fillColor(navy).font('Helvetica-Bold').text(money(d.base),465,y,{width:75,align:'right'}); y+=19;
+      if(Number(d.discount||0)>0){doc.fillColor(grey).font('Helvetica').text('Advance Discount',340,y);doc.fillColor(green).font('Helvetica-Bold').text('-'+money(d.discount),465,y,{width:75,align:'right'});y+=19;}
+      doc.fillColor(grey).font('Helvetica').text('Platform Fee',340,y);
+      doc.fillColor(navy).font('Helvetica-Bold').text(money(d.delivery),465,y,{width:75,align:'right'}); y+=24;
+      doc.moveTo(330,y).lineTo(553,y).strokeColor(orange).lineWidth(1.5).stroke(); y+=15;
+      doc.fillColor(green).fontSize(15).font('Helvetica-Bold').text('TOTAL PAID',340,y);
+      doc.text(money(d.total),465,y,{width:75,align:'right'});
+      y+=48; doc.roundedRect(42,y,511,75,10).fill('#fff8e8');
+      doc.fillColor(navy).fontSize(9).font('Helvetica-Bold').text('Thank you for choosing Tiffin Mart!',58,y+15);
+      doc.fillColor(grey).font('Helvetica').text('Fresh, Pure & Hygienic Home-Style Food Delivery Service',58,y+34);
+      doc.text('WhatsApp: 6206652317  •  Giridih, Jharkhand 815316',58,y+51);
       doc.end();
-    } catch (e) { reject(e); }
+    } catch(e){ reject(e); }
   });
 }
-
 async function notifyEmail(order) {
   if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) return;
   try {

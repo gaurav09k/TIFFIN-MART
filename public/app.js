@@ -1,5 +1,5 @@
 const plans={
- breakfast:{name:'Breakfast Only Pass',single:50,fifteen:700,monthly:1700},
+ breakfast:{name:'Breakfast Only Pass',single:50,fifteen:850,monthly:1700},
  lunch:{name:'Lunch Only Pass',single:80,fifteen:1150,monthly:2250},
  dinner:{name:'Dinner Only Pass',single:80,fifteen:1150,monthly:2250},
  breakfastLunch:{name:'Breakfast + Lunch Pass',single:120,fifteen:1750,monthly:3350},

@@ -4,7 +4,7 @@ const plans={
  dinner:{name:'Dinner Only Pass',single:80,fifteen:1150,monthly:2250},
  breakfastLunch:{name:'Breakfast + Lunch Pass',single:120,fifteen:1750,monthly:3350},
  lunchDinner:{name:'Lunch + Dinner Pass',single:150,fifteen:2150,monthly:4200},
- all:{name:'All-In-One Combo Pass',single:190,fifteen:2750,monthly:5200}
+ all:{name:'All-In-One Combo Pass',single:60,fifteen:2725,monthly:5450}
 };
 let selected={key:'',duration:'',price:0};
 const rupees=n=>'₹'+Number(n||0).toLocaleString('en-IN');

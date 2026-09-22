@@ -19,7 +19,7 @@ if (!fs.existsSync(CUSTOMERS_FILE)) fs.writeFileSync(CUSTOMERS_FILE, '[]');
 if (!fs.existsSync(SESSIONS_FILE)) fs.writeFileSync(SESSIONS_FILE, '[]');
 
 const plans = {
-  breakfast: { name: 'Breakfast Only Pass', meal: 'Breakfast', single: 50, fifteen: 700, monthly: 1700 },
+  breakfast: { name: 'Breakfast Only Pass', meal: 'Breakfast', single: 50, fifteen: 850, monthly: 1700 },
   lunch: { name: 'Lunch Only Pass', meal: 'Lunch', single: 80, fifteen: 1150, monthly: 2250 },
   dinner: { name: 'Dinner Only Pass', meal: 'Dinner', single: 80, fifteen: 1150, monthly: 2250 },
   breakfastLunch: { name: 'Breakfast + Lunch Pass', meal: 'Breakfast + Lunch', single: 120, fifteen: 1750, monthly: 3350 },

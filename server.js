@@ -24,7 +24,7 @@ const plans = {
   dinner: { name: 'Dinner Only Pass', meal: 'Dinner', single: 80, fifteen: 1150, monthly: 2250 },
   breakfastLunch: { name: 'Breakfast + Lunch Pass', meal: 'Breakfast + Lunch', single: 120, fifteen: 1750, monthly: 3350 },
   lunchDinner: { name: 'Lunch + Dinner Pass', meal: 'Lunch + Dinner', single: 150, fifteen: 2150, monthly: 4200 },
-  all: { name: 'All-In-One Combo Pass', meal: 'Breakfast + Lunch + Dinner', single: 190, fifteen: 2750, monthly: 5200 }
+  all: { name: 'All-In-One Combo Pass', meal: 'Breakfast + Lunch + Dinner', single: 60, fifteen: 2725, monthly: 5450 }
 };
 
 const razorpay = (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET)

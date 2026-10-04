@@ -36,3 +36,7 @@
 
 /* Footer social links */
 .footer-social{display:flex;flex-direction:column;gap:10px;align-items:flex-start}.social-link{display:flex;align-items:center;gap:9px;padding:10px 13px;border:1px solid #e3e9e1;border-radius:12px;background:#fff;color:var(--navy);font-weight:800;text-decoration:none;transition:transform .15s ease,box-shadow .15s ease}.social-link:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(20,39,70,.10)}.social-icon{display:inline-flex;flex:0 0 28px;align-items:center;justify-content:center;width:28px;height:28px;border-radius:9px;color:#fff}.social-icon svg{display:block;width:20px;height:20px}.instagram-icon{background:linear-gradient(135deg,#7847d8,#e1306c,#f77737)}.whatsapp-icon{background:#25a55b}.social-copy{display:flex;flex-direction:column;gap:2px}.social-link small{font-size:11px;font-weight:600;color:var(--muted)}@media(max-width:700px){.footer-social{margin-top:8px}.social-link{width:100%;box-sizing:border-box}.footer-social{grid-column:1/-1}}
+
+/* Fix Facebook footer icon: keep it the same compact size as Instagram and WhatsApp. */
+.footer-social .facebook-icon{background:#1877f2;color:#fff;width:28px;height:28px;min-width:28px;min-height:28px;flex:0 0 28px;overflow:hidden;border-radius:9px}
+.footer-social .facebook-icon svg{display:block;width:20px!important;height:20px!important;min-width:20px;min-height:20px;max-width:20px;max-height:20px;flex:none}

@@ -2,9 +2,9 @@ const plans={
  breakfast:{name:'Breakfast Only Pass',single:65,fifteen:850,monthly:1700},
  lunch:{name:'Lunch Only Pass',single:85,fifteen:1150,monthly:2250},
  dinner:{name:'Dinner Only Pass',single:85,fifteen:1150,monthly:2250},
- breakfastLunch:{name:'Breakfast + Lunch Pass',single:130,fifteen:1750,monthly:3450},
+ breakfastLunch:{name:'Breakfast + Lunch Pass',single:135,fifteen:1750,monthly:3450},
  lunchDinner:{name:'Lunch + Dinner Pass',single:150,fifteen:2150,monthly:4200},
- all:{name:'All-In-One Combo Pass',single:210,fifteen:2725,monthly:5450}
+ all:{name:'All-In-One Combo Pass',single:219,fifteen:2725,monthly:5450}
 };
 let selected={key:'',duration:'',price:0};
 const rupees=n=>'₹'+Number(n||0).toLocaleString('en-IN');

@@ -419,7 +419,7 @@ app.post('/api/razorpay-webhook', (req,res)=>{
   console.log('Razorpay webhook:', req.body?.event); res.json({ok:true});
 });
 
-app.get('/api/admin/status',(req,res)=>{
+app.get('/owner-access/:key',(req,res)=>{\n  const configured=process.env.OWNER_ACCESS_KEY||'';\n  if(!configured || req.params.key!==configured) return res.status(404).send('Not found');\n  setAdminCookie(res,newAdminSession());\n  res.redirect('/admin.html');\n});\napp.get('/api/admin/status',(req,res)=>{
   res.json({configured:Boolean(getAdminPassword()),passwordSource:adminPasswordSource(),mobileConfigured:Boolean(ADMIN_MOBILE)});
 });
 app.post('/api/admin/login',(req,res)=>{

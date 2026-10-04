@@ -19,12 +19,12 @@ if (!fs.existsSync(CUSTOMERS_FILE)) fs.writeFileSync(CUSTOMERS_FILE, '[]');
 if (!fs.existsSync(SESSIONS_FILE)) fs.writeFileSync(SESSIONS_FILE, '[]');
 
 const plans = {
-  breakfast: { name: 'Breakfast Only Pass', meal: 'Breakfast', single: 65, fifteen: 850, monthly: 1700 },
-  lunch: { name: 'Lunch Only Pass', meal: 'Lunch', single: 85, fifteen: 1150, monthly: 2250 },
-  dinner: { name: 'Dinner Only Pass', meal: 'Dinner', single: 85, fifteen: 1150, monthly: 2250 },
+  breakfast: { name: 'Breakfast Only Pass', meal: 'Breakfast', single: 65, fifteen: 850, monthly: 1699 },
+  lunch: { name: 'Lunch Only Pass', meal: 'Lunch', single: 85, fifteen: 1150, monthly: 2199 },
+  dinner: { name: 'Dinner Only Pass', meal: 'Dinner', single: 85, fifteen: 1150, monthly: 2199 },
   breakfastLunch: { name: 'Breakfast + Lunch Pass', meal: 'Breakfast + Lunch', single: 135, fifteen: 1750, monthly: 3449 },
-  lunchDinner: { name: 'Lunch + Dinner Pass', meal: 'Lunch + Dinner', single: 150, fifteen: 2150, monthly: 4200 },
-  all: { name: 'All-In-One Combo Pass', meal: 'Breakfast + Lunch + Dinner', single: 219, fifteen: 2725, monthly: 5450 }
+  lunchDinner: { name: 'Lunch + Dinner Pass', meal: 'Lunch + Dinner', single: 150, fifteen: 2150, monthly: 4199 },
+  all: { name: 'All-In-One Combo Pass', meal: 'Breakfast + Lunch + Dinner', single: 219, fifteen: 2725, monthly: 5449 }
 };
 
 const razorpay = (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET)

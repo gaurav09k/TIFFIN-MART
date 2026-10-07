@@ -17,13 +17,26 @@ function selectPass(key,duration){
  const p=plans[key]; selected={key,duration,price:p[duration]};
  $('planKey').value=key; $('duration').value=duration;
  $('selectedPass').textContent=`${p.name} · ${duration==='single'?'Single':duration==='fifteen'?'15 Days':'Monthly'}`;
- $('selectedPrice').textContent=rupees(p[duration]);
- $('passAmount').textContent=rupees(p[duration]);
- const discount=duration==='monthly'?150:0;
- $('discountAmount').textContent=discount?'-'+rupees(discount):rupees(0);
- $('grandTotal').textContent=rupees(Math.max(0,p[duration]-discount+30));
+ updateQuantityPricing();
  $('order').scrollIntoView({behavior:'smooth'});
 }
+function getQuantity(){
+ const el=$('quantity'); const n=Math.floor(Number(el?.value||1));
+ return Math.min(50,Math.max(1,n||1));
+}
+function updateQuantityPricing(){
+ if(!selected.price)return;
+ const qty=getQuantity();
+ const base=selected.price*qty;
+ const discount=selected.duration==='monthly'?150:0;
+ $('selectedPrice').textContent=rupees(base);
+ $('passAmount').textContent=rupees(base);
+ $('discountAmount').textContent=discount?'-'+rupees(discount):rupees(0);
+ $('grandTotal').textContent=rupees(Math.max(0,base-discount+30));
+ const hint=$('quantityHint');
+ if(hint) hint.textContent=selected.duration==='single'?'Single meal ke liye kitne log?':'Kitne logon ke liye pass chahiye?';
+}
+$('quantity')?.addEventListener('input',updateQuantityPricing);
 
 const start=$('startDate');
 if(start) start.min=new Date().toISOString().split('T')[0];
@@ -37,18 +50,18 @@ $('orderForm')?.addEventListener('submit',async e=>{
  setStatus('Creating secure payment...');
  const customer={name:nameEl.value.trim(),phone:phoneEl.value.trim(),email:emailEl.value.trim(),address:addressEl.value.trim(),startDate:start.value,note:''};
  try{
-  const res=await fetch('/api/create-order',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({planKey:selected.key,duration:selected.duration,customer})});
+  const res=await fetch('/api/create-order',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({planKey:selected.key,duration:selected.duration,quantity:getQuantity(),customer})});
   const out=await res.json(); if(!res.ok) throw new Error(out.error||'Unable to create payment order.');
   const options={key:out.keyId,amount:out.amount,currency:'INR',name:'Tiffin Mart',description:`${out.planName} - ${out.duration}`,order_id:out.orderId,prefill:{name:customer.name,email:customer.email,contact:customer.phone},notes:{address:customer.address},theme:{color:'#2e7d32'},
    handler:async response=>{
     setStatus('Verifying payment...');
-    const vr=await fetch('/api/verify-payment',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...response,orderDetails:{...customer,planKey:selected.key,planName:out.planName,duration:out.duration,base:out.base,discount:out.advanceDiscount,delivery:out.delivery,total:out.amountRupees}})});
+    const vr=await fetch('/api/verify-payment',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...response,orderDetails:{...customer,planKey:selected.key,planName:out.planName,duration:out.duration,quantity:out.quantity,base:out.base,discount:out.advanceDiscount,delivery:out.delivery,total:out.amountRupees}})});
     const vd=await vr.json(); if(!vr.ok) throw new Error(vd.error||'Payment verification failed.');
     setStatus(`Payment successful! Order confirmed: ${vd.confirmationId}`,'status ok');
     const invoiceBtn=document.createElement('a'); invoiceBtn.href=vd.invoiceUrl; invoiceBtn.target='_blank'; invoiceBtn.rel='noopener'; invoiceBtn.textContent='📄 View / Print Invoice'; invoiceBtn.className='invoice-link'; invoiceBtn.style.display='inline-block'; invoiceBtn.style.marginTop='10px'; invoiceBtn.style.fontWeight='700'; invoiceBtn.style.textDecoration='none';
     $('status').appendChild(document.createElement('br')); $('status').appendChild(invoiceBtn);
     await loadAccount();
-    const msg=encodeURIComponent(`Tiffin Mart Order\nOrder: ${vd.confirmationId}\nName: ${customer.name}\nPass: ${out.planName}\nDuration: ${out.duration}\nAmount: ₹${out.amountRupees}\nStart: ${customer.startDate}\nAddress: ${customer.address}`);
+    const msg=encodeURIComponent(`Tiffin Mart Order\nOrder: ${vd.confirmationId}\nName: ${customer.name}\nPass: ${out.planName}\nDuration: ${out.duration}\nQuantity: ${out.quantity}\nAmount: ₹${out.amountRupees}\nStart: ${customer.startDate}\nAddress: ${customer.address}`);
     setTimeout(()=>window.open('https://wa.me/916206652317?text='+msg,'_blank'),400);
    }};
   const rzp=new Razorpay(options); rzp.on('payment.failed',()=>setStatus('Payment failed/cancelled. Please try again.','status error')); rzp.open();

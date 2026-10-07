@@ -363,7 +363,7 @@ app.get('/invoice/:confirmationId/:token', async (req,res)=>{
 app.post('/api/create-order', requireLogin, async (req,res)=>{
   try {
     if (!razorpay) return res.status(503).json({error:'Payment gateway is not configured on the server yet.'});
-    const {planKey,duration,customer={}} = req.body || {};
+    const {planKey,duration,quantity=1,customer={}} = req.body || {};
     const plan=plans[planKey];
     if(!plan || !['single','fifteen','monthly'].includes(duration)) return res.status(400).json({error:'Invalid pass selected.'});
     const account=readCustomers().find(c=>c.phone===req.customerPhone);
@@ -371,10 +371,11 @@ app.post('/api/create-order', requireLogin, async (req,res)=>{
     const name=account.name, phone=account.phone, email=account.email, address=clean(customer.address,600), startDate=clean(customer.startDate,20), note=clean(customer.note,500);
     if(!name || !phone || !address || !startDate) return res.status(400).json({error:'Please fill all required order details.'});
     if(!phoneOk(phone)) return res.status(400).json({error:'Please enter a valid mobile number.'});
-    const base=plan[duration], advanceDiscount=(duration==='monthly')?150:0, delivery=30, total=Math.max(0,base-advanceDiscount+delivery);
+    const quantityNumber=Math.min(50,Math.max(1,Math.floor(Number(quantity)||1)));
+    const base=plan[duration]*quantityNumber, advanceDiscount=(duration==='monthly')?150:0, delivery=30, total=Math.max(0,base-advanceDiscount+delivery);
     const receipt=`TM-${Date.now()}`;
     const order=await razorpay.orders.create({amount:total*100,currency:'INR',receipt,notes:{plan:plan.name,duration,customer_name:name,phone}});
-    res.json({orderId:order.id,amount:total*100,amountRupees:total,keyId:process.env.RAZORPAY_KEY_ID,planName:plan.name,duration,base,advanceDiscount,delivery,customer:{name,phone,email,address,startDate,note}});
+    res.json({orderId:order.id,amount:total*100,amountRupees:total,keyId:process.env.RAZORPAY_KEY_ID,planName:plan.name,duration,quantity:quantityNumber,base,advanceDiscount,delivery,customer:{name,phone,email,address,startDate,note}});
   } catch(e){ console.error(e); res.status(500).json({error:'Could not create payment order.'}); }
 });
 

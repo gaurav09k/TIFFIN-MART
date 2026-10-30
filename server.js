@@ -123,6 +123,13 @@ function saveOrder(order) {
 }
 function clean(v, max=500) { return String(v ?? '').trim().slice(0, max); }
 function phoneOk(v) { return /^\+?\d{10,15}$/.test(String(v).replace(/[\s-]/g,'')); }
+function passEndDate(startDate, duration) {
+  const start = new Date(`${startDate}T00:00:00`);
+  if (!Number.isFinite(start.getTime())) return '';
+  const daysAfterStart = duration === 'monthly' ? 28 : duration === 'fifteen' ? 14 : 0;
+  start.setDate(start.getDate() + daysAfterStart);
+  return `${start.getFullYear()}-${String(start.getMonth()+1).padStart(2,'0')}-${String(start.getDate()).padStart(2,'0')}`;
+}
 
 function postJson(url, body) {
   return new Promise((resolve, reject) => {
@@ -321,10 +328,10 @@ app.put('/api/me',requireLogin,(req,res)=>{
 app.get('/api/my-orders',requireLogin,(req,res)=>{
   const orders=readOrders().filter(o=>normalizePhone(o.orderDetails?.phone)===req.customerPhone).sort((a,b)=>new Date(b.paidAt)-new Date(a.paidAt));
   const out=orders.map(order=>{
-    const d=order.orderDetails||{}; const days=d.duration==='single'?1:d.duration==='fifteen'?15:30;
-    const start=new Date(`${d.startDate}T00:00:00`); const end=new Date(start); end.setDate(end.getDate()+days-1);
+    const d=order.orderDetails||{}; const endDate=d.endDate||passEndDate(d.startDate,d.duration);
+    const end=new Date(`${endDate}T00:00:00`);
     const today=new Date(); today.setHours(0,0,0,0);
-    return {confirmationId:order.confirmationId,status:order.status,paymentStatus:order.paymentStatus,paidAt:order.paidAt,planName:d.planName,duration:d.duration,startDate:d.startDate,endDate:end.toISOString().slice(0,10),remainingDays:Math.max(0,Math.ceil((end-today)/86400000)),total:d.total,address:d.address,invoiceUrl:`${process.env.SITE_URL||''}/invoice/${order.confirmationId}/${invoiceToken(order.confirmationId)}`};
+    return {confirmationId:order.confirmationId,status:order.status,paymentStatus:order.paymentStatus,paidAt:order.paidAt,planName:d.planName,duration:d.duration,startDate:d.startDate,endDate,remainingDays:Math.max(0,Math.ceil((end-today)/86400000)),total:d.total,address:d.address,invoiceUrl:`${process.env.SITE_URL||''}/invoice/${order.confirmationId}/${invoiceToken(order.confirmationId)}`};
   });
   res.json({orders:out});
 });
@@ -337,12 +344,11 @@ app.get('/api/order', (req,res)=>{
     const order=readOrders().find(o=>o.confirmationId===confirmationId && String(o.orderDetails?.phone||'').replace(/[\s-]/g,'')===phone);
     if(!order) return res.status(404).json({error:'Order not found. Please check your Order ID and mobile number.'});
     const d=order.orderDetails||{};
-    const days=d.duration==='single'?1:d.duration==='fifteen'?15:30;
-    const start=new Date(`${d.startDate}T00:00:00`);
-    const end=new Date(start); end.setDate(end.getDate()+days-1);
+    const endDate=d.endDate||passEndDate(d.startDate,d.duration);
+    const end=new Date(`${endDate}T00:00:00`);
     const today=new Date(); today.setHours(0,0,0,0);
     const remaining=Math.max(0, Math.ceil((end-today)/86400000));
-    res.json({confirmationId:order.confirmationId,status:order.status,paymentStatus:order.paymentStatus,paidAt:order.paidAt,orderDetails:d,startDate:d.startDate,endDate:end.toISOString().slice(0,10),totalDays:days,remainingDays:remaining});
+    res.json({confirmationId:order.confirmationId,status:order.status,paymentStatus:order.paymentStatus,paidAt:order.paidAt,orderDetails:d,startDate:d.startDate,endDate,totalDays:d.duration==='monthly'?29:d.duration==='fifteen'?15:1,remainingDays:remaining});
   } catch(e){ console.error(e); res.status(500).json({error:'Could not find the order.'}); }
 });
 

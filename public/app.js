@@ -72,6 +72,11 @@ $('orderForm')?.addEventListener('submit',async e=>{
    window.TiffinMartNativePayment.startPayment(JSON.stringify(options));
    return;
   }
+  if(window.TiffinMartNativePayment&&window.__tmNativePaymentAvailable){
+   window.__tmNativePayment=true; window.__tmNativePaymentHandler=options.handler;
+   window.TiffinMartNativePayment.startPayment(JSON.stringify(options));
+   return;
+  }
   const rzp=new Razorpay(options); rzp.on('payment.failed',()=>setStatus('Payment failed/cancelled. Please try again.','status error')); rzp.open();
  }catch(err){setStatus(err.message||'Something went wrong.','status error');}
 });

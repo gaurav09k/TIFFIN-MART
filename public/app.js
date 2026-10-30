@@ -19,7 +19,7 @@ function setStatus(t,cls='status'){
 function selectPass(key,duration){
  const p=plans[key]; selected={key,duration,price:p[duration]};
  $('planKey').value=key; $('duration').value=duration;
- $('selectedPass').textContent=`${p.name} · ${duration==='single'?'Single':duration==='fifteen'?'15 Days':'Monthly'}`;
+ $('selectedPass').textContent=`${p.name} · ${duration==='single'?'Single':duration==='fifteen'?'15 Days':'Monthly (28 Days)'}`;
  updateQuantityPricing();
  $('order').scrollIntoView({behavior:'smooth'});
 }
@@ -69,7 +69,7 @@ $('orderForm')?.addEventListener('submit',async e=>{
     const invoiceBtn=document.createElement('a'); invoiceBtn.href=vd.invoiceUrl; invoiceBtn.target='_blank'; invoiceBtn.rel='noopener'; invoiceBtn.textContent='📄 View / Print Invoice'; invoiceBtn.className='invoice-link'; invoiceBtn.style.display='inline-block'; invoiceBtn.style.marginTop='10px'; invoiceBtn.style.fontWeight='700'; invoiceBtn.style.textDecoration='none';
     $('status').appendChild(document.createElement('br')); $('status').appendChild(invoiceBtn);
     await loadAccount();
-    const msg=encodeURIComponent(`Tiffin Mart Order\nOrder: ${vd.confirmationId}\nName: ${customer.name}\nPass: ${out.planName}\nDuration: ${out.duration}\nQuantity: ${out.quantity}\nAmount: ₹${out.amountRupees}\nStart: ${customer.startDate}\nAddress: ${customer.address}`);
+    const msg=encodeURIComponent(`Tiffin Mart Order\nOrder: ${vd.confirmationId}\nName: ${customer.name}\nPass: ${out.planName}\nDuration: ${out.duration}\nQuantity: ${out.quantity}\nAmount: ₹${out.amountRupees}\nStart: ${customer.startDate}\nEnd: ${vd.endDate||''}\nAddress: ${customer.address}`);
     setTimeout(()=>window.open('https://wa.me/916206652317?text='+msg,'_blank'),400);
    }};
   if(window.TiffinMartNativePayment&&window.__tmNativePaymentAvailable){

@@ -24,7 +24,7 @@ import com.razorpay.PaymentResultListener;
 import org.json.JSONObject;
 
 public class MainActivity extends Activity implements PaymentResultListener {
-    private static final String URL = "https://tiffin-mart-production.up.railway.app/";
+    private static final String URL = "https://tiffin-mart-test.onrender.com/";
     private static final String TAG = "TiffinMartPayment";
 
     private WebView web;

@@ -58,7 +58,12 @@ $('orderForm')?.addEventListener('submit',async e=>{
   const options={key:out.keyId,amount:out.amount,currency:'INR',name:'Tiffin Mart',description:`${out.planName} - ${out.duration}`,order_id:out.orderId,prefill:{name:customer.name,email:customer.email,contact:customer.phone},notes:{address:customer.address},theme:{color:'#2e7d32'},
    handler:async response=>{
     setStatus('Verifying payment...');
-    const vr=await fetch('/api/verify-payment',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...response,orderDetails:{...customer,planKey:selected.key,planName:out.planName,duration:out.duration,quantity:out.quantity,base:out.base,discount:out.advanceDiscount,delivery:out.delivery,total:out.amountRupees}})});
+    const orderDetails={...customer,planKey:selected.key,planName:out.planName,duration:out.duration,quantity:out.quantity,base:out.base,discount:out.advanceDiscount,delivery:out.delivery,total:out.amountRupees};
+    const nativePayment=Boolean(window.__tmNativePayment);
+    const verifyEndpoint=nativePayment?'/api/verify-native-payment':'/api/verify-payment';
+    const verifyPayload=nativePayment?{razorpay_order_id:response.razorpay_order_id,razorpay_payment_id:response.razorpay_payment_id,orderDetails}:{...response,orderDetails};
+    const vr=await fetch(verifyEndpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(verifyPayload)});
+    window.__tmNativePayment=false;
     const vd=await vr.json(); if(!vr.ok) throw new Error(vd.error||'Payment verification failed.');
     setStatus(`Payment successful! Order confirmed: ${vd.confirmationId}`,'status ok');
     const invoiceBtn=document.createElement('a'); invoiceBtn.href=vd.invoiceUrl; invoiceBtn.target='_blank'; invoiceBtn.rel='noopener'; invoiceBtn.textContent='📄 View / Print Invoice'; invoiceBtn.className='invoice-link'; invoiceBtn.style.display='inline-block'; invoiceBtn.style.marginTop='10px'; invoiceBtn.style.fontWeight='700'; invoiceBtn.style.textDecoration='none';

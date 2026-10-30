@@ -349,7 +349,7 @@ app.get('/api/order', (req,res)=>{
     const end=new Date(`${endDate}T00:00:00`);
     const today=new Date(); today.setHours(0,0,0,0);
     const remaining=Math.max(0, Math.ceil((end-today)/86400000));
-    res.json({confirmationId:order.confirmationId,status:order.status,paymentStatus:order.paymentStatus,paidAt:order.paidAt,orderDetails:d,startDate:d.startDate,endDate,totalDays:d.duration==='monthly'?29:d.duration==='fifteen'?15:1,remainingDays:remaining});
+    res.json({confirmationId:order.confirmationId,status:order.status,paymentStatus:order.paymentStatus,paidAt:order.paidAt,orderDetails:d,startDate:d.startDate,endDate,totalDays:d.duration==='monthly'?28:d.duration==='fifteen'?15:1,remainingDays:remaining});
   } catch(e){ console.error(e); res.status(500).json({error:'Could not find the order.'}); }
 });
 
@@ -405,7 +405,7 @@ app.post('/api/verify-payment', requireLogin, async (req,res)=>{
     await Promise.allSettled([notifyGoogleSheet(order),notifyEmail(order)]);
     const invoiceUrl=`${process.env.SITE_URL || ''}/invoice/${confirmationId}/${invoiceToken(confirmationId)}`;
     const wa=`https://wa.me/916206652317?text=${encodeURIComponent(`Tiffin Mart Order\nOrder: ${confirmationId}\nName: ${orderDetails.name}\nPass: ${orderDetails.planName}\nDuration: ${orderDetails.duration}\nAmount: ₹${orderDetails.total}\nStart: ${orderDetails.startDate}\nEnd: ${orderDetails.endDate}\nAddress: ${orderDetails.address}\nInvoice: ${invoiceUrl}`)}`;
-    res.json({ok:true,confirmationId,paymentStatus,whatsappUrl:wa,invoiceUrl});
+    res.json({ok:true,confirmationId,paymentStatus,endDate:orderDetails.endDate,whatsappUrl:wa,invoiceUrl});
   } catch(e){ console.error(e); res.status(500).json({error:'Verification error.'}); }
 });
 
@@ -430,7 +430,7 @@ app.post('/api/verify-native-payment', requireLogin, async (req,res)=>{
     await Promise.allSettled([notifyGoogleSheet(order),notifyEmail(order)]);
     const invoiceUrl=`${process.env.SITE_URL || ''}/invoice/${confirmationId}/${invoiceToken(confirmationId)}`;
     const wa=`https://wa.me/916206652317?text=${encodeURIComponent(`Tiffin Mart Order\nOrder: ${confirmationId}\nName: ${orderDetails.name}\nPass: ${orderDetails.planName}\nDuration: ${orderDetails.duration}\nAmount: ₹${orderDetails.total}\nStart: ${orderDetails.startDate}\nAddress: ${orderDetails.address}\nInvoice: ${invoiceUrl}`)}`;
-    res.json({ok:true,confirmationId,paymentStatus:payment.status,whatsappUrl:wa,invoiceUrl});
+    res.json({ok:true,confirmationId,paymentStatus:payment.status,endDate:orderDetails.endDate,whatsappUrl:wa,invoiceUrl});
   } catch(e){ console.error('Native payment verification failed:',e); res.status(500).json({error:'Native payment verification failed.'}); }
 });
 

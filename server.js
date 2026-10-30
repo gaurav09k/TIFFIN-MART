@@ -182,7 +182,8 @@ function buildInvoicePdf(order) {
       doc.fillColor('#182230').fontSize(10).font('Helvetica');
       doc.text(`Name: ${d.name || '-'}`,58,y+38); doc.text(`Mobile: ${d.phone || '-'}`,300,y+38);
       doc.text(`Email: ${d.email || '-'}`,58,y+58); doc.text(`Start Date: ${d.startDate || '-'}`,300,y+58);
-      doc.text(`Address: ${d.address || '-'}`,58,y+78,{width:450});
+       doc.text(`End Date: ${d.endDate || passEndDate(d.startDate,d.duration) || '-'}`,58,y+78);
+      doc.text(`Address: ${d.address || '-'}`,300,y+78,{width:245});
       y+=138; doc.fillColor(navy).fontSize(11).font('Helvetica-Bold').text('ORDER SUMMARY',42,y); y+=18;
       doc.roundedRect(42,y,511,30,7).fill(navy); doc.fillColor('#fff').fontSize(9).font('Helvetica-Bold');
       doc.text('PASS',55,y+10); doc.text('DURATION',280,y+10); doc.text('AMOUNT',465,y+10,{width:75,align:'right'});
@@ -397,12 +398,13 @@ app.post('/api/verify-payment', requireLogin, async (req,res)=>{
     let paymentStatus='unknown';
     if(razorpay){ try { const p=await razorpay.payments.fetch(razorpay_payment_id); paymentStatus=p.status; } catch(e){ console.error('Payment status lookup failed:',e.message); } }
     const confirmationId=`TM-${Date.now().toString().slice(-8)}`;
+    orderDetails.endDate=passEndDate(orderDetails.startDate,orderDetails.duration);
     const order={confirmationId,paidAt:new Date().toISOString(),status:'paid',paymentStatus,razorpay_order_id,razorpay_payment_id,orderDetails};
     if(normalizePhone(orderDetails.phone)!==req.customerPhone) return res.status(403).json({error:'Account mismatch. Please login again.'});
     saveOrder(order);
     await Promise.allSettled([notifyGoogleSheet(order),notifyEmail(order)]);
     const invoiceUrl=`${process.env.SITE_URL || ''}/invoice/${confirmationId}/${invoiceToken(confirmationId)}`;
-    const wa=`https://wa.me/916206652317?text=${encodeURIComponent(`Tiffin Mart Order\nOrder: ${confirmationId}\nName: ${orderDetails.name}\nPass: ${orderDetails.planName}\nDuration: ${orderDetails.duration}\nAmount: ₹${orderDetails.total}\nStart: ${orderDetails.startDate}\nAddress: ${orderDetails.address}\nInvoice: ${invoiceUrl}`)}`;
+    const wa=`https://wa.me/916206652317?text=${encodeURIComponent(`Tiffin Mart Order\nOrder: ${confirmationId}\nName: ${orderDetails.name}\nPass: ${orderDetails.planName}\nDuration: ${orderDetails.duration}\nAmount: ₹${orderDetails.total}\nStart: ${orderDetails.startDate}\nEnd: ${orderDetails.endDate}\nAddress: ${orderDetails.address}\nInvoice: ${invoiceUrl}`)}`;
     res.json({ok:true,confirmationId,paymentStatus,whatsappUrl:wa,invoiceUrl});
   } catch(e){ console.error(e); res.status(500).json({error:'Verification error.'}); }
 });
@@ -422,6 +424,7 @@ app.post('/api/verify-native-payment', requireLogin, async (req,res)=>{
       return res.json({ok:true,confirmationId:existing.confirmationId,paymentStatus:existing.paymentStatus,invoiceUrl});
     }
     const confirmationId=`TM-${Date.now().toString().slice(-8)}`;
+    orderDetails.endDate=passEndDate(orderDetails.startDate,orderDetails.duration);
     const order={confirmationId,paidAt:new Date().toISOString(),status:'paid',paymentStatus:payment.status,razorpay_order_id,razorpay_payment_id,orderDetails};
     saveOrder(order);
     await Promise.allSettled([notifyGoogleSheet(order),notifyEmail(order)]);
@@ -468,7 +471,7 @@ app.get('/api/admin/summary',(req,res)=>{
   const customerRows=customers.map(c=>{
     const cos=orders.filter(o=>normalizePhone(o.orderDetails?.phone)===c.phone).sort((a,b)=>new Date(b.paidAt)-new Date(a.paidAt));
     const last=cos[0]; const d=last?.orderDetails||{};
-    return {name:c.name,phone:c.phone,email:c.email,createdAt:c.createdAt,loginCount:Number(c.loginCount||0),lastLoginAt:c.lastLoginAt,orders:cos.length,lastOrderId:last?.confirmationId||null,lastPass:d.planName||null,lastAmount:d.total||null};
+    return {name:c.name,phone:c.phone,email:c.email,createdAt:c.createdAt,loginCount:Number(c.loginCount||0),lastLoginAt:c.lastLoginAt,orders:cos.length,lastOrderId:last?.confirmationId||null,lastPass:d.planName||null,lastStartDate:d.startDate||null,lastEndDate:d.endDate||passEndDate(d.startDate,d.duration),lastAmount:d.total||null};
   }).sort((a,b)=>new Date(b.lastLoginAt||b.createdAt)-new Date(a.lastLoginAt||a.createdAt));
   res.json({ok:true,stats:{customers:customers.length,totalLogins:customers.reduce((n,c)=>n+Number(c.loginCount||0),0),paidOrders:orders.length,passBuyers:buyers.size,revenue},customers:customerRows});
 });

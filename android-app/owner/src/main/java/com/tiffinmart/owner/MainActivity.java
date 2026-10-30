@@ -15,7 +15,7 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 
 public class MainActivity extends Activity {
-    private static final String URL = "https://tiffin-mart-production.up.railway.app/owner.html";
+    private static final String URL = "https://tiffin-mart-test.onrender.com/owner.html";
     private WebView web;
     private ProgressBar progress;
     private LinearLayout errorBox;

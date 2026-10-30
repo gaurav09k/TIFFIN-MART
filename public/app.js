@@ -8,6 +8,9 @@ const plans={
 };
 let selected={key:'',duration:'',price:0};
 const rupees=n=>'₹'+Number(n||0).toLocaleString('en-IN');
+window.__tmNativePaymentSuccess=function(paymentId,orderId){try{window.__tmNativePaymentHandler&&window.__tmNativePaymentHandler({razorpay_payment_id:paymentId,razorpay_order_id:orderId,razorpay_signature:''});}catch(e){console.error(e);}};
+window.__tmNativePaymentFailed=function(message){window.__tmNativePayment=false;setStatus(message||'Payment failed or was cancelled.','status error');};
+
 const $=id=>document.getElementById(id);
 
 function setStatus(t,cls='status'){
@@ -64,6 +67,11 @@ $('orderForm')?.addEventListener('submit',async e=>{
     const msg=encodeURIComponent(`Tiffin Mart Order\nOrder: ${vd.confirmationId}\nName: ${customer.name}\nPass: ${out.planName}\nDuration: ${out.duration}\nQuantity: ${out.quantity}\nAmount: ₹${out.amountRupees}\nStart: ${customer.startDate}\nAddress: ${customer.address}`);
     setTimeout(()=>window.open('https://wa.me/916206652317?text='+msg,'_blank'),400);
    }};
+  if(window.TiffinMartNativePayment&&window.__tmNativePaymentAvailable){
+   window.__tmNativePayment=true; window.__tmNativePaymentHandler=options.handler;
+   window.TiffinMartNativePayment.startPayment(JSON.stringify(options));
+   return;
+  }
   const rzp=new Razorpay(options); rzp.on('payment.failed',()=>setStatus('Payment failed/cancelled. Please try again.','status error')); rzp.open();
  }catch(err){setStatus(err.message||'Something went wrong.','status error');}
 });

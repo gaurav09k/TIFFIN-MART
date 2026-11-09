@@ -70,7 +70,7 @@ $('orderForm')?.addEventListener('submit',async e=>{
     $('status').appendChild(document.createElement('br')); $('status').appendChild(invoiceBtn);
     await loadAccount();
     const msg=encodeURIComponent(`Tiffin Mart Order\nOrder: ${vd.confirmationId}\nName: ${customer.name}\nPass: ${out.planName}\nDuration: ${out.duration}\nQuantity: ${out.quantity}\nAmount: ₹${out.amountRupees}\nStart: ${customer.startDate}\nEnd: ${vd.endDate||''}\nAddress: ${customer.address}`);
-    setTimeout(()=>window.open('https://wa.me/916206652317?text='+msg,'_blank'),400);
+    setTimeout(()=>window.open('https://wa.me/917762062621?text='+msg,'_blank'),400);
    }};
   if(window.TiffinMartNativePayment&&window.__tmNativePaymentAvailable){
    window.__tmNativePayment=true; window.__tmNativePaymentHandler=options.handler;

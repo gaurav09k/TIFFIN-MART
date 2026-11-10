@@ -1,10 +1,90 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="match_parent" android:background="#FFFFFF">
-    <WebView android:id="@+id/webview" android:layout_width="match_parent" android:layout_height="match_parent" />
-    <ProgressBar android:id="@+id/progress" android:layout_width="48dp" android:layout_height="48dp" android:layout_gravity="center" />
-    <LinearLayout android:id="@+id/errorBox" android:visibility="gone" android:orientation="vertical" android:gravity="center" android:padding="32dp" android:layout_width="match_parent" android:layout_height="match_parent">
-        <ImageView android:src="@drawable/tiffin_mart_logo" android:layout_width="96dp" android:layout_height="96dp" android:contentDescription="Tiffin Mart Owner" />
-        <TextView android:text="Tiffin Mart Owner" android:textSize="24sp" android:textStyle="bold" android:layout_marginTop="16dp" android:layout_width="wrap_content" android:layout_height="wrap_content" />
-        <TextView android:text="Internet connection check karke dobara try karein." android:gravity="center" android:layout_marginTop="8dp" android:layout_width="wrap_content" android:layout_height="wrap_content" />
-        <Button android:id="@+id/retry" android:text="Retry" android:layout_marginTop="16dp" android:layout_width="wrap_content" android:layout_height="wrap_content" />
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF">
+
+    <WebView
+        android:id="@+id/webview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <LinearLayout
+        android:id="@+id/splash"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:background="#FFFFFF"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ImageView
+            android:src="@drawable/tiffin_mart_logo"
+            android:layout_width="116dp"
+            android:layout_height="116dp"
+            android:contentDescription="Tiffin Mart logo" />
+
+        <TextView
+            android:text="TIFFIN MART"
+            android:textColor="#172B4D"
+            android:textSize="25sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.08"
+            android:layout_marginTop="16dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:text="OWNER DASHBOARD"
+            android:textColor="#2E7D32"
+            android:textSize="15sp"
+            android:layout_marginTop="6dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <ProgressBar
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginTop="28dp"
+            android:indeterminateTint="#2E7D32" />
+    </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/progress"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="center"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/errorBox"
+        android:visibility="gone"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="32dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <ImageView
+            android:src="@drawable/tiffin_mart_logo"
+            android:layout_width="96dp"
+            android:layout_height="96dp"
+            android:contentDescription="Tiffin Mart Owner" />
+        <TextView
+            android:text="Tiffin Mart Owner"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:layout_marginTop="16dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:text="Internet connection check karke dobara try karein."
+            android:gravity="center"
+            android:layout_marginTop="8dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <Button
+            android:id="@+id/retry"
+            android:text="Retry"
+            android:layout_marginTop="16dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
     </LinearLayout>
 </FrameLayout>

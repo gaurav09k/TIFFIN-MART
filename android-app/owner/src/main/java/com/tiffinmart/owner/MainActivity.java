@@ -50,7 +50,8 @@ public class MainActivity extends Activity {
 
     private void load() {
         errorBox.setVisibility(View.GONE);
-        progress.setVisibility(View.VISIBLE);
+        splash.setVisibility(View.VISIBLE);
+        progress.setVisibility(View.GONE);
         web.loadUrl(URL);
     }
 

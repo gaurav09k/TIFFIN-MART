@@ -29,7 +29,8 @@ public class MainActivity extends Activity implements PaymentResultListener {
 
     private WebView web;
     private ProgressBar progress;
-    private LinearLayout errorBox;\n    private LinearLayout splash;
+    private LinearLayout errorBox;
+    private LinearLayout splash;
     private Checkout checkout;
     private String activeOrderId;
 
@@ -41,7 +42,8 @@ public class MainActivity extends Activity implements PaymentResultListener {
 
         web = findViewById(R.id.webview);
         progress = findViewById(R.id.progress);
-        errorBox = findViewById(R.id.errorBox);\n        splash = findViewById(R.id.splash);
+        errorBox = findViewById(R.id.errorBox);
+        splash = findViewById(R.id.splash);
         ((Button) findViewById(R.id.retry)).setOnClickListener(v -> load());
 
         Checkout.preload(getApplicationContext());

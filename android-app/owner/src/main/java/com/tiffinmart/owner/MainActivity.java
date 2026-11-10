@@ -18,7 +18,8 @@ public class MainActivity extends Activity {
     private static final String URL = "https://tiffin-mart-production.up.railway.app/owner.html";
     private WebView web;
     private ProgressBar progress;
-    private LinearLayout errorBox;\n    private LinearLayout splash;
+    private LinearLayout errorBox;
+    private LinearLayout splash;
 
     @SuppressLint("SetJavaScriptEnabled")
     @Override
@@ -27,7 +28,8 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
         web = findViewById(R.id.webview);
         progress = findViewById(R.id.progress);
-        errorBox = findViewById(R.id.errorBox);\n        splash = findViewById(R.id.splash);
+        errorBox = findViewById(R.id.errorBox);
+        splash = findViewById(R.id.splash);
         ((Button)findViewById(R.id.retry)).setOnClickListener(v -> load());
 
         WebSettings s = web.getSettings();

@@ -35,13 +35,15 @@ public class MainActivity extends Activity {
         WebSettings s = web.getSettings();
         s.setJavaScriptEnabled(true);
         s.setDomStorageEnabled(true);
+        s.setCacheMode(WebSettings.LOAD_NO_CACHE);
+        web.clearCache(true);
         s.setDatabaseEnabled(true);
         s.setSupportZoom(false);
         s.setBuiltInZoomControls(false);
         s.setDisplayZoomControls(false);
         s.setJavaScriptCanOpenWindowsAutomatically(true);
         s.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
-        s.setUserAgentString(s.getUserAgentString() + " TiffinMartOwnerAndroid/1.1");
+        s.setUserAgentString(s.getUserAgentString() + " TiffinMartOwnerAndroid/2.0");
         web.setWebViewClient(new WebViewClient() {
             @Override public void onPageStarted(WebView v, String u, Bitmap f) { progress.setVisibility(View.VISIBLE); errorBox.setVisibility(View.GONE); }
             @Override public void onPageFinished(WebView v, String u) { progress.setVisibility(View.GONE); splash.setVisibility(View.GONE); }

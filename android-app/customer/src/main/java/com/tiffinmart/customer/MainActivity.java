@@ -51,6 +51,8 @@ public class MainActivity extends Activity implements PaymentResultListener {
         WebSettings s = web.getSettings();
         s.setJavaScriptEnabled(true);
         s.setDomStorageEnabled(true);
+        s.setCacheMode(WebSettings.LOAD_NO_CACHE);
+        web.clearCache(true);
         s.setDatabaseEnabled(true);
         s.setSupportZoom(false);
         s.setBuiltInZoomControls(false);
@@ -58,7 +60,7 @@ public class MainActivity extends Activity implements PaymentResultListener {
         s.setJavaScriptCanOpenWindowsAutomatically(true);
         s.setMediaPlaybackRequiresUserGesture(false);
         s.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
-        s.setUserAgentString(s.getUserAgentString() + " TiffinMartAndroid/1.3");
+        s.setUserAgentString(s.getUserAgentString() + " TiffinMartAndroid/2.0");
 
         web.addJavascriptInterface(new NativePaymentBridge(), "TiffinMartNativePayment");
         web.setWebChromeClient(new WebChromeClient());

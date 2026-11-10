@@ -29,7 +29,7 @@ public class MainActivity extends Activity implements PaymentResultListener {
 
     private WebView web;
     private ProgressBar progress;
-    private LinearLayout errorBox;
+    private LinearLayout errorBox;\n    private LinearLayout splash;
     private Checkout checkout;
     private String activeOrderId;
 
@@ -41,7 +41,7 @@ public class MainActivity extends Activity implements PaymentResultListener {
 
         web = findViewById(R.id.webview);
         progress = findViewById(R.id.progress);
-        errorBox = findViewById(R.id.errorBox);
+        errorBox = findViewById(R.id.errorBox);\n        splash = findViewById(R.id.splash);
         ((Button) findViewById(R.id.retry)).setOnClickListener(v -> load());
 
         Checkout.preload(getApplicationContext());
@@ -65,10 +65,10 @@ public class MainActivity extends Activity implements PaymentResultListener {
                 progress.setVisibility(View.VISIBLE); errorBox.setVisibility(View.GONE);
             }
             @Override public void onPageFinished(WebView view, String url) {
-                progress.setVisibility(View.GONE); installNativePaymentHook();
+                progress.setVisibility(View.GONE); splash.setVisibility(View.GONE); installNativePaymentHook();
             }
             @Override public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
-                if (request.isForMainFrame()) { progress.setVisibility(View.GONE); errorBox.setVisibility(View.VISIBLE); }
+                if (request.isForMainFrame()) { progress.setVisibility(View.GONE); splash.setVisibility(View.GONE); errorBox.setVisibility(View.VISIBLE); }
             }
         });
         load();
@@ -111,7 +111,7 @@ public class MainActivity extends Activity implements PaymentResultListener {
         runOnUiThread(() -> { if (web != null) web.evaluateJavascript("javascript:" + script, null); });
     }
 
-    private void load() { errorBox.setVisibility(View.GONE); progress.setVisibility(View.VISIBLE); web.loadUrl(URL); }
+    private void load() { errorBox.setVisibility(View.GONE); splash.setVisibility(View.VISIBLE); progress.setVisibility(View.GONE); web.loadUrl(URL); }
     @Override public void onBackPressed() { if (web.canGoBack()) web.goBack(); else super.onBackPressed(); }
     @Override protected void onDestroy() { if (web != null) { web.removeJavascriptInterface("TiffinMartNativePayment"); web.stopLoading(); web.destroy(); } super.onDestroy(); }
 }

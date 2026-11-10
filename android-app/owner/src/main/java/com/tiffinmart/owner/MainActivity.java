@@ -18,7 +18,7 @@ public class MainActivity extends Activity {
     private static final String URL = "https://tiffin-mart-test.onrender.com/owner.html";
     private WebView web;
     private ProgressBar progress;
-    private LinearLayout errorBox;
+    private LinearLayout errorBox;\n    private LinearLayout splash;
 
     @SuppressLint("SetJavaScriptEnabled")
     @Override
@@ -27,7 +27,7 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
         web = findViewById(R.id.webview);
         progress = findViewById(R.id.progress);
-        errorBox = findViewById(R.id.errorBox);
+        errorBox = findViewById(R.id.errorBox);\n        splash = findViewById(R.id.splash);
         ((Button)findViewById(R.id.retry)).setOnClickListener(v -> load());
 
         WebSettings s = web.getSettings();
@@ -42,8 +42,8 @@ public class MainActivity extends Activity {
         s.setUserAgentString(s.getUserAgentString() + " TiffinMartOwnerAndroid/1.1");
         web.setWebViewClient(new WebViewClient() {
             @Override public void onPageStarted(WebView v, String u, Bitmap f) { progress.setVisibility(View.VISIBLE); errorBox.setVisibility(View.GONE); }
-            @Override public void onPageFinished(WebView v, String u) { progress.setVisibility(View.GONE); }
-            @Override public void onReceivedError(WebView v, WebResourceRequest r, WebResourceError e) { if (r.isForMainFrame()) { progress.setVisibility(View.GONE); errorBox.setVisibility(View.VISIBLE); } }
+            @Override public void onPageFinished(WebView v, String u) { progress.setVisibility(View.GONE); splash.setVisibility(View.GONE); }
+            @Override public void onReceivedError(WebView v, WebResourceRequest r, WebResourceError e) { if (r.isForMainFrame()) { progress.setVisibility(View.GONE); splash.setVisibility(View.GONE); errorBox.setVisibility(View.VISIBLE); } }
         });
         load();
     }

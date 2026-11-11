@@ -17,9 +17,10 @@
         android:layout_height="match_parent">
 
         <ImageView
-            android:src="@drawable/tiffin_mart_logo"
+            android:src="@drawable/splash_logo"
             android:layout_width="116dp"
             android:layout_height="116dp"
+            android:scaleType="fitCenter"
             android:contentDescription="Tiffin Mart logo" />
 
         <TextView
@@ -62,11 +63,14 @@
         android:padding="32dp"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
+
         <ImageView
-            android:src="@drawable/tiffin_mart_logo"
+            android:src="@drawable/splash_logo"
             android:layout_width="96dp"
             android:layout_height="96dp"
+            android:scaleType="fitCenter"
             android:contentDescription="Tiffin Mart Owner" />
+
         <TextView
             android:text="Tiffin Mart Owner"
             android:textSize="24sp"
@@ -74,12 +78,14 @@
             android:layout_marginTop="16dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
+
         <TextView
             android:text="Internet connection check karke dobara try karein."
             android:gravity="center"
             android:layout_marginTop="8dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
+
         <Button
             android:id="@+id/retry"
             android:text="Retry"

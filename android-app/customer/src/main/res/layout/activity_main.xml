@@ -17,9 +17,10 @@
         android:layout_height="match_parent">
 
         <ImageView
-            android:src="@drawable/tiffin_mart_logo"
+            android:src="@drawable/splash_logo"
             android:layout_width="116dp"
             android:layout_height="116dp"
+            android:scaleType="fitCenter"
             android:contentDescription="Tiffin Mart logo" />
 
         <TextView
@@ -64,9 +65,10 @@
         android:layout_height="match_parent">
 
         <ImageView
-            android:src="@drawable/tiffin_mart_logo"
+            android:src="@drawable/splash_logo"
             android:layout_width="96dp"
             android:layout_height="96dp"
+            android:scaleType="fitCenter"
             android:contentDescription="Tiffin Mart" />
 
         <TextView
